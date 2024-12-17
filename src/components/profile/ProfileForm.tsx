@@ -1,11 +1,10 @@
-import { useState } from "react";
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Save, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 import {
   Select,
   SelectContent,
@@ -13,9 +12,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { PhoneVerification } from "./PhoneVerification";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
 
 interface ProfileFormProps {
   initialData: {
@@ -47,9 +43,6 @@ export function ProfileForm({ initialData, onSubmit, onCancel }: ProfileFormProp
     phone: initialData.phone || "",
   });
   const [countryCode, setCountryCode] = useState("+27");
-  const [showVerification, setShowVerification] = useState(false);
-  const [verificationError, setVerificationError] = useState<string>();
-  const [isVerifying, setIsVerifying] = useState(false);
   const { toast } = useToast();
 
   const handlePhoneChange = (value: string) => {
@@ -64,87 +57,23 @@ export function ProfileForm({ initialData, onSubmit, onCancel }: ProfileFormProp
       : `${countryCode}${formData.phone}`;
 
     try {
-      const { error } = await supabase.auth.signInWithOtp({
-        phone: phoneWithCode,
-      });
-
-      if (error) {
-        if (error.message.includes("phone_provider_disabled") || error.message.includes("Unsupported phone provider")) {
-          toast({
-            title: "Phone Verification Unavailable",
-            description: "Phone verification is currently not configured. Please contact support.",
-            variant: "destructive",
-          });
-          return;
-        }
-        throw error;
-      }
-
-      setShowVerification(true);
-      toast({
-        title: "Verification code sent",
-        description: "Please check your phone for the verification code.",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to send verification code",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleVerifyCode = async (code: string) => {
-    setIsVerifying(true);
-    setVerificationError(undefined);
-
-    try {
-      const phoneWithCode = formData.phone.startsWith("+") 
-        ? formData.phone 
-        : `${countryCode}${formData.phone}`;
-
-      const { error } = await supabase.auth.verifyOtp({
-        phone: phoneWithCode,
-        token: code,
-        type: 'sms',
-      });
-
-      if (error) throw error;
-
       onSubmit({
         ...formData,
         phone: phoneWithCode,
       });
 
       toast({
-        title: "Phone number verified",
-        description: "Your phone number has been verified successfully.",
+        title: "Profile updated",
+        description: "Your profile has been updated successfully.",
       });
-      setShowVerification(false);
     } catch (error: any) {
-      setVerificationError(error.message || "Invalid verification code");
-    } finally {
-      setIsVerifying(false);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update profile",
+        variant: "destructive",
+      });
     }
   };
-
-  if (showVerification) {
-    return (
-      <Card>
-        <CardContent className="pt-6">
-          <PhoneVerification
-            phoneNumber={formData.phone.startsWith("+") 
-              ? formData.phone 
-              : `${countryCode}${formData.phone}`}
-            onVerify={handleVerifyCode}
-            onCancel={() => setShowVerification(false)}
-            error={verificationError}
-            isLoading={isVerifying}
-          />
-        </CardContent>
-      </Card>
-    );
-  }
 
   return (
     <Card>
@@ -194,9 +123,6 @@ export function ProfileForm({ initialData, onSubmit, onCancel }: ProfileFormProp
 
             <div className="space-y-2">
               <Label htmlFor="phone">Phone Number</Label>
-              <div className="text-sm text-muted-foreground mb-2">
-                You'll use this number to get notifications, sign in and recover your account.
-              </div>
               <div className="flex gap-2">
                 <Select value={countryCode} onValueChange={setCountryCode}>
                   <SelectTrigger className="w-[140px]">
@@ -221,9 +147,6 @@ export function ProfileForm({ initialData, onSubmit, onCancel }: ProfileFormProp
                   value={formData.phone}
                   onChange={(e) => handlePhoneChange(e.target.value)}
                 />
-              </div>
-              <div className="text-sm text-muted-foreground mt-2">
-                A verification code will be sent to this number
               </div>
             </div>
           </div>
