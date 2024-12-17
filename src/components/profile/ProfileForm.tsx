@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Save, X } from "lucide-react";
 
 interface ProfileFormProps {
   initialData: {
@@ -17,34 +18,40 @@ export function ProfileForm({ initialData, onSubmit, onCancel }: ProfileFormProp
 
   return (
     <Card>
-      <CardContent className="p-6">
+      <CardHeader>
+        <CardTitle>Edit Profile</CardTitle>
+      </CardHeader>
+      <CardContent>
         <form
           onSubmit={(e) => {
             e.preventDefault();
             onSubmit(formData);
           }}
-          className="space-y-4"
+          className="space-y-6"
         >
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="full_name">Full Name</Label>
             <Input
               id="full_name"
+              placeholder="Enter your full name"
               value={formData.full_name}
               onChange={(e) =>
                 setFormData({ ...formData, full_name: e.target.value })
               }
             />
           </div>
-          <div className="flex justify-end space-x-2">
+          <div className="flex justify-end gap-3">
             <Button
               type="button"
               variant="outline"
               onClick={onCancel}
             >
+              <X className="h-4 w-4 mr-2" />
               Cancel
             </Button>
             <Button type="submit">
-              Save
+              <Save className="h-4 w-4 mr-2" />
+              Save Changes
             </Button>
           </div>
         </form>

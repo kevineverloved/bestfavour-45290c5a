@@ -25,7 +25,7 @@ export function ReviewsList({ reviews, isLoading }: ReviewsListProps) {
           <CardTitle>Reviews from Service Providers</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-muted-foreground">Loading reviews...</div>
+          <div className="text-muted-foreground animate-pulse">Loading reviews...</div>
         </CardContent>
       </Card>
     );
@@ -37,16 +37,18 @@ export function ReviewsList({ reviews, isLoading }: ReviewsListProps) {
         <CardTitle>Reviews from Service Providers</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
+        <div className="space-y-6">
           {reviews.length === 0 ? (
-            <p className="text-muted-foreground">No reviews yet</p>
+            <p className="text-muted-foreground text-center py-8">
+              No reviews yet
+            </p>
           ) : (
             reviews.map((review) => (
               <div
                 key={review.id}
-                className="border-b border-border pb-4 last:border-0 last:pb-0"
+                className="border-b border-border pb-6 last:border-0 last:pb-0"
               >
-                <div className="flex items-center gap-2 mb-2">
+                <div className="flex items-center gap-2 mb-3">
                   <div className="flex">
                     {[...Array(5)].map((_, i) => (
                       <Star
@@ -59,14 +61,16 @@ export function ReviewsList({ reviews, isLoading }: ReviewsListProps) {
                       />
                     ))}
                   </div>
-                  <span className="text-sm text-muted-foreground">
-                    by {review.provider.business_name}
+                  <span className="text-sm font-medium">
+                    {review.provider.business_name}
                   </span>
                 </div>
                 {review.comment && (
-                  <p className="text-sm text-foreground">{review.comment}</p>
+                  <p className="text-sm text-foreground leading-relaxed">
+                    "{review.comment}"
+                  </p>
                 )}
-                <p className="text-xs text-muted-foreground mt-1">
+                <p className="text-xs text-muted-foreground mt-2">
                   {format(new Date(review.created_at), "PPP")}
                 </p>
               </div>

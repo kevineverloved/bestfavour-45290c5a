@@ -7,6 +7,8 @@ import { ProfileHeader } from "@/components/profile/ProfileHeader";
 import { ProfileForm } from "@/components/profile/ProfileForm";
 import { ProfileError } from "@/components/profile/ProfileError";
 import { ReviewsList } from "@/components/profile/ReviewsList";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Loader2 } from "lucide-react";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -134,7 +136,11 @@ const Profile = () => {
   }, [session, navigate, sessionLoading]);
 
   if (sessionLoading || profileLoading) {
-    return <div className="container mx-auto py-8">Loading...</div>;
+    return (
+      <div className="container mx-auto py-8 flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
   }
 
   if (profileError) {
@@ -146,8 +152,8 @@ const Profile = () => {
   }
 
   return (
-    <div className="container mx-auto py-8">
-      <div className="space-y-6">
+    <div className="container mx-auto py-8 px-4 md:px-8 max-w-4xl">
+      <div className="space-y-8">
         <ProfileHeader
           avatarUrl={profile?.avatar_url}
           fullName={profile?.full_name}
@@ -155,21 +161,43 @@ const Profile = () => {
           onAvatarUpload={handleAvatarUpload}
         />
 
-        {isEditing && (
-          <ProfileForm
-            initialData={{
-              full_name: profile?.full_name || "",
-            }}
-            onSubmit={(data) => updateProfile.mutate(data)}
-            onCancel={() => setIsEditing(false)}
-          />
-        )}
-
-        {reviewsError ? (
-          <ProfileError message="Failed to load reviews. Please try refreshing the page." />
-        ) : (
-          <ReviewsList reviews={reviews || []} isLoading={reviewsLoading} />
-        )}
+        <Tabs defaultValue="profile" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="profile">Profile Details</TabsTrigger>
+            <TabsTrigger value="reviews">Reviews</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="profile" className="mt-6">
+            {isEditing ? (
+              <ProfileForm
+                initialData={{
+                  full_name: profile?.full_name || "",
+                }}
+                onSubmit={(data) => updateProfile.mutate(data)}
+                onCancel={() => setIsEditing(false)}
+              />
+            ) : (
+              <div className="bg-card rounded-lg shadow-sm p-6">
+                <h3 className="text-lg font-semibold mb-4">About Me</h3>
+                <p className="text-muted-foreground">
+                  {profile?.full_name ? (
+                    `Hi, I'm ${profile.full_name}!`
+                  ) : (
+                    "No profile information available yet. Click 'Edit Profile' to add your details."
+                  )}
+                </p>
+              </div>
+            )}
+          </TabsContent>
+          
+          <TabsContent value="reviews" className="mt-6">
+            {reviewsError ? (
+              <ProfileError message="Failed to load reviews. Please try refreshing the page." />
+            ) : (
+              <ReviewsList reviews={reviews || []} isLoading={reviewsLoading} />
+            )}
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
