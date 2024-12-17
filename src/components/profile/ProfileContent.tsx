@@ -8,7 +8,7 @@ import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Settings } from "lucide-react";
+import { Settings2 } from "lucide-react";
 import { AvatarCropDialog } from "./AvatarCropDialog";
 
 interface ProfileContentProps {
@@ -135,9 +135,10 @@ export function ProfileContent({
       <Button 
         variant="ghost" 
         size="icon" 
-        className="fixed top-4 left-4 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
+        className="fixed top-4 left-4 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 hover:bg-accent"
       >
-        <Settings className="h-6 w-6" />
+        <Settings2 className="h-5 w-5" />
+        <span className="sr-only">Settings</span>
       </Button>
 
       <div className="space-y-8">
@@ -158,7 +159,7 @@ export function ProfileContent({
               setCropDialogOpen(false);
               setSelectedImage(null);
             }}
-            onCropComplete={handleCroppedImage}
+            handleCropComplete={handleCroppedImage}
           />
         )}
 
