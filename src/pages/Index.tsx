@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Link } from "react-router-dom";
 
 const services = [
   {
@@ -46,10 +47,12 @@ const Index = () => {
           <p className="mt-3 max-w-md mx-auto text-base text-gray-500 sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
             Your trusted community of local professionals across South Africa, ready to help!
           </p>
-          <div className="mt-5 max-w-md mx-auto sm:flex sm:justify-center md:mt-8">
-            <Button className="w-full sm:w-auto">
-              Find Help Today
-            </Button>
+          <div className="mt-5 max-w-md mx-auto sm:flex sm:justify-center md:mt-8 gap-4">
+            <Link to="/auth">
+              <Button>
+                Get Started
+              </Button>
+            </Link>
           </div>
         </div>
       </div>
@@ -67,9 +70,11 @@ const Index = () => {
               </CardHeader>
               <CardContent>
                 <p className="text-gray-500">{service.description}</p>
-                <Button className="mt-4 w-full" variant="outline">
-                  View Services
-                </Button>
+                <Link to="/auth">
+                  <Button className="mt-4 w-full" variant="outline">
+                    View Services
+                  </Button>
+                </Link>
               </CardContent>
             </Card>
           ))}
