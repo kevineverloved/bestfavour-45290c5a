@@ -42,6 +42,17 @@ const iconMap: Record<string, React.ComponentType<any>> = {
   settings: Settings,
 };
 
+// Color mapping for service category icons
+const iconColors: Record<string, string> = {
+  brush: "#9b87f5",    // Primary Purple
+  flower: "#0EA5E9",   // Ocean Blue
+  wrench: "#7E69AB",   // Secondary Purple
+  home: "#33C3F0",     // Sky Blue
+  truck: "#8B5CF6",    // Vivid Purple
+  shield: "#1EAEDB",   // Bright Blue
+  settings: "#6E59A5", // Tertiary Purple
+};
+
 const promotionalImages = [
   {
     url: "https://images.unsplash.com/photo-1649972904349-6e44c42644a7",
@@ -155,8 +166,9 @@ const Index = () => {
                   <Card className="h-32 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
                     <CardContent className="h-full flex flex-col items-center justify-center p-4">
                       <IconComponent 
-                        className="h-12 w-12 mb-2 text-primary group-hover:scale-110 transition-transform" 
+                        className="h-12 w-12 mb-2 group-hover:scale-110 transition-transform" 
                         strokeWidth={1.5}
+                        style={{ color: iconColors[category.icon] || '#6E59A5' }}
                       />
                       <span className="text-center font-medium text-gray-900">
                         {category.name}
