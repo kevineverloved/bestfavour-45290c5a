@@ -13,6 +13,7 @@ import BookingsPage from "./pages/BookingsPage";
 import Location from "./pages/Location";
 import Settings from "./pages/Settings";
 import PersonalInformation from "./pages/PersonalInformation";
+import NotificationsSettings from "./pages/NotificationsSettings";
 
 const App: React.FC = () => {
   const [queryClient] = useState(() => new QueryClient({
@@ -37,6 +38,7 @@ const App: React.FC = () => {
             <Route path="/location" element={<Location />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/settings/personal-information" element={<PersonalInformation />} />
+            <Route path="/settings/notifications" element={<NotificationsSettings />} />
           </Routes>
           <Toaster />
           <Sonner />
