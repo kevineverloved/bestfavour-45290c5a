@@ -8,6 +8,8 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { createClient } from '@supabase/supabase-js';
@@ -23,6 +25,10 @@ const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [role, setRole] = useState("user");
+  const [bio, setBio] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -32,7 +38,7 @@ const Auth = () => {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Please fill in all fields",
+        description: "Please fill in all required fields",
       });
       return false;
     }
@@ -52,6 +58,15 @@ const Auth = () => {
         variant: "destructive",
         title: "Invalid Password",
         description: "Password must be at least 6 characters long",
+      });
+      return false;
+    }
+
+    if (!isLogin && !fullName) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Please enter your full name",
       });
       return false;
     }
@@ -83,6 +98,14 @@ const Auth = () => {
         const { error } = await supabase.auth.signUp({
           email,
           password,
+          options: {
+            data: {
+              full_name: fullName,
+              phone_number: phoneNumber,
+              role: role,
+              bio: bio,
+            }
+          }
         });
         
         if (error) throw error;
@@ -141,6 +164,62 @@ const Auth = () => {
                 disabled={isLoading}
               />
             </div>
+
+            {!isLogin && (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="fullName">Full Name</Label>
+                  <Input
+                    id="fullName"
+                    type="text"
+                    placeholder="John Doe"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    required
+                    disabled={isLoading}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="phoneNumber">Phone Number</Label>
+                  <Input
+                    id="phoneNumber"
+                    type="tel"
+                    placeholder="+1 (555) 000-0000"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    disabled={isLoading}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>I am a...</Label>
+                  <RadioGroup value={role} onValueChange={setRole} className="flex flex-col space-y-1">
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="user" id="user" />
+                      <Label htmlFor="user">Regular User</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="creator" id="creator" />
+                      <Label htmlFor="creator">Content Creator</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="business" id="business" />
+                      <Label htmlFor="business">Business Owner</Label>
+                    </div>
+                  </RadioGroup>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="bio">Bio</Label>
+                  <Textarea
+                    id="bio"
+                    placeholder="Tell us a bit about yourself..."
+                    value={bio}
+                    onChange={(e) => setBio(e.target.value)}
+                    disabled={isLoading}
+                  />
+                </div>
+              </>
+            )}
+
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? "Loading..." : isLogin ? "Sign In" : "Sign Up"}
             </Button>
