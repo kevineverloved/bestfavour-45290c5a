@@ -10,6 +10,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Settings2 } from "lucide-react";
 import { AvatarCropDialog } from "./AvatarCropDialog";
+import { useNavigate } from "react-router-dom";
 
 interface ProfileContentProps {
   session: Session;
@@ -31,6 +32,7 @@ export function ProfileContent({
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   const updateProfile = useMutation({
     mutationFn: async (data: {
@@ -136,6 +138,7 @@ export function ProfileContent({
         variant="ghost" 
         size="icon" 
         className="fixed top-4 left-4 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 hover:bg-accent"
+        onClick={() => navigate('/settings')}
       >
         <Settings2 className="h-5 w-5" />
         <span className="sr-only">Settings</span>
