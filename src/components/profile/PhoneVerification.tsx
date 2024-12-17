@@ -81,6 +81,5 @@ export function PhoneVerification({
         </Button>
       </div>
     </div>
-  </div>
   );
 }
