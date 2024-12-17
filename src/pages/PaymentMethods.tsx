@@ -25,10 +25,9 @@ const PaymentMethods = () => {
       });
 
       yoco.showPopup({
-        amountInCents: 0,
         currency: 'ZAR',
         name: 'Add Payment Method',
-        description: 'Verify your card for future bookings',
+        description: 'Add your card for future bookings',
         callback: async function (result: any) {
           if (result.error) {
             toast({

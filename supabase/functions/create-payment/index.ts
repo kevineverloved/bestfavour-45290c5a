@@ -28,7 +28,8 @@ serve(async (req) => {
         },
         body: JSON.stringify({
           token,
-          currency: 'ZAR'
+          currency: 'ZAR',
+          verify_card: true
         })
       })
 
