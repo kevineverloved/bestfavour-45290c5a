@@ -29,7 +29,7 @@ const HelpSupport = () => {
             <h2 className="text-lg font-medium mb-4">Contact Us</h2>
             <div className="space-y-4">
               <a 
-                href="mailto:support@example.com" 
+                href="mailto:thamsanxamudau@gmail.com" 
                 className="flex items-center gap-3 p-3 rounded-lg hover:bg-accent transition-colors"
               >
                 <div className="p-2 rounded-full bg-primary/10 text-primary">
@@ -37,14 +37,14 @@ const HelpSupport = () => {
                 </div>
                 <div>
                   <p className="font-medium">Email Support</p>
-                  <p className="text-sm text-muted-foreground">support@example.com</p>
+                  <p className="text-sm text-muted-foreground">thamsanxamudau@gmail.com</p>
                 </div>
               </a>
               
               <Separator />
               
               <a 
-                href="tel:+27000000000" 
+                href="tel:+27832918957" 
                 className="flex items-center gap-3 p-3 rounded-lg hover:bg-accent transition-colors"
               >
                 <div className="p-2 rounded-full bg-primary/10 text-primary">
@@ -52,7 +52,7 @@ const HelpSupport = () => {
                 </div>
                 <div>
                   <p className="font-medium">Phone Support</p>
-                  <p className="text-sm text-muted-foreground">+27 00 000 0000</p>
+                  <p className="text-sm text-muted-foreground">083 291 8957</p>
                   <p className="text-xs text-muted-foreground">Available Mon-Fri, 9am-5pm SAST</p>
                 </div>
               </a>
@@ -61,7 +61,7 @@ const HelpSupport = () => {
               
               <button 
                 className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-accent transition-colors"
-                onClick={() => window.open('https://wa.me/27000000000', '_blank')}
+                onClick={() => window.open('https://wa.me/27832918957', '_blank')}
               >
                 <div className="p-2 rounded-full bg-primary/10 text-primary">
                   <MessageCircle className="h-5 w-5" />
