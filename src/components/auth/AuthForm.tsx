@@ -25,39 +25,68 @@ const AuthForm = () => {
   const navigate = useNavigate();
 
   const getFriendlyErrorMessage = (error: any) => {
-    const message = error.message.toLowerCase();
-    if (message.includes("email already registered")) {
+    if (!error) return "Something went wrong. Please try again.";
+    
+    const message = error.message?.toLowerCase() || "";
+    const errorCode = error.code?.toLowerCase() || "";
+    
+    if (message.includes("email already registered") || errorCode === "23505") {
       return "This email is already registered. Please try logging in instead.";
     }
-    if (message.includes("invalid login credentials")) {
-      return "Invalid email or password. Please try again.";
+    if (message.includes("invalid login credentials") || errorCode === "invalid_credentials") {
+      return "Invalid email or password. Please check your credentials and try again.";
     }
-    if (message.includes("password")) {
+    if (message.includes("password") || errorCode.includes("password")) {
       return "Password should be at least 6 characters long.";
     }
-    if (message.includes("email")) {
+    if (message.includes("email") || errorCode.includes("email")) {
       return "Please enter a valid email address.";
     }
     return "Something went wrong. Please try again.";
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
+  const validateInputs = () => {
     if (!email || !password) {
       toast({
         variant: "destructive",
         title: "Missing Information",
         description: "Please fill in all required fields",
       });
-      return;
+      return false;
     }
+
+    if (password.length < 6) {
+      toast({
+        variant: "destructive",
+        title: "Invalid Password",
+        description: "Password must be at least 6 characters long",
+      });
+      return false;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      toast({
+        variant: "destructive",
+        title: "Invalid Email",
+        description: "Please enter a valid email address",
+      });
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!validateInputs()) return;
 
     setIsLoading(true);
     try {
       if (isLogin) {
         const { error } = await supabase.auth.signInWithPassword({
-          email,
+          email: email.trim(),
           password,
         });
         
@@ -70,7 +99,7 @@ const AuthForm = () => {
         navigate("/");
       } else {
         const { error } = await supabase.auth.signUp({
-          email,
+          email: email.trim(),
           password,
           options: {
             data: {
@@ -88,6 +117,7 @@ const AuthForm = () => {
         navigate("/");
       }
     } catch (error: any) {
+      console.error("Auth error:", error);
       toast({
         variant: "destructive",
         title: "Error",
@@ -134,6 +164,7 @@ const AuthForm = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 disabled={isLoading}
+                minLength={6}
               />
             </div>
 
