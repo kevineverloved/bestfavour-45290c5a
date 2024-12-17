@@ -22,7 +22,7 @@ export function AvatarCropDialog({
   imageUrl,
   isOpen,
   onClose,
-  onCropComplete: handleCropComplete,
+  onCropComplete,
 }: AvatarCropDialogProps) {
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
@@ -69,7 +69,7 @@ export function AvatarCropDialog({
 
       canvas.toBlob((blob) => {
         if (blob) {
-          handleCropComplete(blob);
+          onCropComplete(blob);
         }
       }, 'image/jpeg', 0.95);
     } catch (error) {

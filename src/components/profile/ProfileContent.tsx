@@ -159,7 +159,7 @@ export function ProfileContent({
               setCropDialogOpen(false);
               setSelectedImage(null);
             }}
-            handleCropComplete={handleCroppedImage}
+            onCropComplete={handleCroppedImage}
           />
         )}
 
