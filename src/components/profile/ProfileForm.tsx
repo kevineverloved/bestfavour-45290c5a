@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Save, X, ChevronDown } from "lucide-react";
+import { Save, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -14,6 +14,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { PhoneVerification } from "./PhoneVerification";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 interface ProfileFormProps {
   initialData: {
@@ -35,7 +37,6 @@ const countryCodes = [
   { code: "+27", flag: "🇿🇦", country: "South Africa" },
   { code: "+1", flag: "🇺🇸", country: "United States" },
   { code: "+44", flag: "🇬🇧", country: "United Kingdom" },
-  // Add more country codes as needed
 ];
 
 export function ProfileForm({ initialData, onSubmit, onCancel }: ProfileFormProps) {
@@ -67,7 +68,17 @@ export function ProfileForm({ initialData, onSubmit, onCancel }: ProfileFormProp
         phone: phoneWithCode,
       });
 
-      if (error) throw error;
+      if (error) {
+        if (error.message.includes("phone_provider_disabled") || error.message.includes("Unsupported phone provider")) {
+          toast({
+            title: "Phone Verification Unavailable",
+            description: "Phone verification is currently not configured. Please contact support.",
+            variant: "destructive",
+          });
+          return;
+        }
+        throw error;
+      }
 
       setShowVerification(true);
       toast({
@@ -100,7 +111,6 @@ export function ProfileForm({ initialData, onSubmit, onCancel }: ProfileFormProp
 
       if (error) throw error;
 
-      // If verification is successful, submit the form data
       onSubmit({
         ...formData,
         phone: phoneWithCode,
