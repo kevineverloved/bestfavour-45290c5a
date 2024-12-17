@@ -37,7 +37,7 @@ const PaymentMethods = () => {
       });
 
       yoco.showPopup({
-        amountInCents: 100, // This is just for testing, will be updated with actual amount
+        amountInCents: 200, // Minimum amount required by Yoco
         currency: 'ZAR',
         name: 'Add Payment Method',
         description: 'Add a new payment method to your account',
@@ -55,7 +55,7 @@ const PaymentMethods = () => {
           try {
             const { data, error } = await supabase.functions.invoke('create-payment', {
               body: {
-                amount: 100,
+                amount: 200,
                 currency: 'ZAR',
                 token: result.id
               }

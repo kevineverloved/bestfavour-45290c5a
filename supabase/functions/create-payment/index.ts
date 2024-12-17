@@ -13,11 +13,16 @@ serve(async (req) => {
   }
 
   try {
-    const { amount, currency = 'ZAR' } = await req.json()
+    const { amount, currency = 'ZAR', token } = await req.json()
     const YOCO_SECRET_KEY = Deno.env.get('YOCO_SECRET_KEY')
 
     if (!YOCO_SECRET_KEY) {
       throw new Error('Missing Yoco secret key')
+    }
+
+    // Validate minimum amount
+    if (amount < 200) {
+      throw new Error('Amount must be at least R2.00 (200 cents)')
     }
 
     // Create a payment with Yoco API
@@ -30,7 +35,7 @@ serve(async (req) => {
       body: JSON.stringify({
         amount,
         currency,
-        source: 'token'
+        source: token
       })
     })
 
