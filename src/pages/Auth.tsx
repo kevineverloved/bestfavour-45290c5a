@@ -1,3 +1,7 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { createClient } from '@supabase/supabase-js';
+import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -8,16 +12,12 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { createClient } from '@supabase/supabase-js';
-import { useToast } from "@/hooks/use-toast";
 import ServiceTypeSelection from "@/components/auth/ServiceTypeSelection";
-import ProviderForm from "@/components/auth/ProviderForm";
+import ServiceProviderOnboarding from "@/components/auth/ServiceProviderOnboarding";
 
 const supabase = createClient(
-  'https://xyzcompany.supabase.co',
-  'public-anon-key'
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_ANON_KEY
 );
 
 const Auth = () => {
@@ -26,76 +26,58 @@ const Auth = () => {
   const [password, setPassword] = useState("");
   const [userType, setUserType] = useState("seeker");
   const [isLoading, setIsLoading] = useState(false);
-  const [providerData, setProviderData] = useState({
-    businessName: "",
-    serviceType: "maintenance",
-    experience: "",
-    availability: "",
-    location: "",
-    rates: "",
-    insurance: "",
-  });
+  const [showProviderForm, setShowProviderForm] = useState(false);
   
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const validateForm = () => {
+  const handleProviderFormComplete = async (providerData: any) => {
+    try {
+      setIsLoading(true);
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            user_type: 'provider',
+            ...providerData
+          }
+        }
+      });
+      
+      if (error) throw error;
+      
+      toast({
+        title: "Success",
+        description: "Please check your email to verify your account",
+      });
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "An error occurred",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
     if (!email || !password) {
       toast({
         variant: "destructive",
         title: "Error",
         description: "Please fill in all required fields",
       });
-      return false;
-    }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      toast({
-        variant: "destructive",
-        title: "Invalid Email",
-        description: "Please enter a valid email address",
-      });
-      return false;
-    }
-
-    if (password.length < 6) {
-      toast({
-        variant: "destructive",
-        title: "Invalid Password",
-        description: "Password must be at least 6 characters long",
-      });
-      return false;
+      return;
     }
 
     if (!isLogin && userType === "provider") {
-      const requiredFields = ["businessName", "experience", "availability", "location", "rates", "insurance"];
-      const missingFields = requiredFields.filter(field => !providerData[field]);
-      
-      if (missingFields.length > 0) {
-        toast({
-          variant: "destructive",
-          title: "Missing Information",
-          description: "Please fill in all required provider information",
-        });
-        return false;
-      }
+      setShowProviderForm(true);
+      return;
     }
-
-    return true;
-  };
-
-  const handleProviderDataChange = (key: string, value: string) => {
-    setProviderData(prev => ({
-      ...prev,
-      [key]: value
-    }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!validateForm()) return;
     
     setIsLoading(true);
     try {
@@ -119,7 +101,6 @@ const Auth = () => {
           options: {
             data: {
               user_type: userType,
-              ...(userType === "provider" ? providerData : {}),
             }
           }
         });
@@ -141,6 +122,10 @@ const Auth = () => {
       setIsLoading(false);
     }
   };
+
+  if (showProviderForm) {
+    return <ServiceProviderOnboarding onComplete={handleProviderFormComplete} />;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
@@ -182,21 +167,11 @@ const Auth = () => {
             </div>
 
             {!isLogin && (
-              <>
-                <ServiceTypeSelection
-                  userType={userType}
-                  setUserType={setUserType}
-                  isLoading={isLoading}
-                />
-                
-                {userType === "provider" && (
-                  <ProviderForm
-                    formData={providerData}
-                    setFormData={handleProviderDataChange}
-                    isLoading={isLoading}
-                  />
-                )}
-              </>
+              <ServiceTypeSelection
+                userType={userType}
+                setUserType={setUserType}
+                isLoading={isLoading}
+              />
             )}
 
             <Button type="submit" className="w-full" disabled={isLoading}>
@@ -228,11 +203,6 @@ const Auth = () => {
                 </button>
               </p>
             )}
-          </div>
-          <div className="mt-4 text-center">
-            <Link to="/" className="text-sm text-gray-500 hover:text-gray-700">
-              Back to home
-            </Link>
           </div>
         </CardContent>
       </Card>
