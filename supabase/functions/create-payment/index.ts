@@ -11,7 +11,7 @@ serve(async (req) => {
   }
 
   try {
-    const { token, verifyOnly } = await req.json()
+    const { token } = await req.json()
     const YOCO_SECRET_KEY = Deno.env.get('YOCO_SECRET_KEY')
 
     if (!YOCO_SECRET_KEY) {
@@ -20,8 +20,8 @@ serve(async (req) => {
 
     console.log('Verifying card token:', token);
 
-    // Use Yoco's verify endpoint
-    const response = await fetch('https://online.yoco.com/v1/tokens/verify', {
+    // Use Yoco's charge endpoint with a minimal amount for verification
+    const response = await fetch('https://online.yoco.com/v1/charges/', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -29,6 +29,11 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         token,
+        amountInCents: 50, // Minimum amount required by Yoco (R0.50)
+        currency: 'ZAR',
+        metadata: {
+          verifyOnly: true
+        }
       })
     });
 
@@ -36,7 +41,24 @@ serve(async (req) => {
     console.log('Yoco API response:', result);
 
     if (!response.ok) {
-      throw new Error(result.message || 'Failed to verify card');
+      throw new Error(result.displayMessage || result.message || 'Failed to verify card');
+    }
+
+    // If successful, immediately refund the verification charge
+    if (result.id) {
+      const refundResponse = await fetch(`https://online.yoco.com/v1/refunds/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${YOCO_SECRET_KEY}`
+        },
+        body: JSON.stringify({
+          chargeId: result.id
+        })
+      });
+      
+      const refundResult = await refundResponse.json();
+      console.log('Refund response:', refundResult);
     }
 
     return new Response(

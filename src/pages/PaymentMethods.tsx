@@ -28,6 +28,7 @@ const PaymentMethods = () => {
         currency: 'ZAR',
         name: 'Add Payment Method',
         description: 'Add your card for future bookings',
+        metadata: { verifyOnly: true },
         callback: async function (result: any) {
           if (result.error) {
             toast({
