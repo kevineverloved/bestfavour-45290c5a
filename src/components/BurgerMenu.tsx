@@ -1,4 +1,4 @@
-import { Menu, User, Bookmark } from "lucide-react";
+import { Menu, User, Bookmark, Search, FileText } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -36,7 +36,7 @@ export const BurgerMenu = () => {
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="fixed top-4 right-4">
+        <Button variant="ghost" size="icon" className="fixed top-4 right-4 md:hidden">
           <Menu className="h-6 w-6" />
         </Button>
       </SheetTrigger>
@@ -55,6 +55,24 @@ export const BurgerMenu = () => {
             <Button variant="ghost" className="w-full justify-start">
               <Bookmark className="mr-2 h-4 w-4" />
               Bookings
+            </Button>
+          </Link>
+          <Link to="/find-help">
+            <Button variant="ghost" className="w-full justify-start">
+              <Search className="mr-2 h-4 w-4" />
+              Find Help
+            </Button>
+          </Link>
+          <Link to="/become-professional">
+            <Button variant="ghost" className="w-full justify-start">
+              <User className="mr-2 h-4 w-4" />
+              Become a Professional
+            </Button>
+          </Link>
+          <Link to="/terms">
+            <Button variant="ghost" className="w-full justify-start">
+              <FileText className="mr-2 h-4 w-4" />
+              Terms and Conditions
             </Button>
           </Link>
           <Button
