@@ -103,7 +103,7 @@ const Index = () => {
                     <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer">
                       <CardHeader>
                         <CardTitle className="flex items-center gap-3">
-                          <IconComponent className="h-6 w-6" />
+                          {IconComponent && <IconComponent className="h-6 w-6" />}
                           {category.name}
                         </CardTitle>
                       </CardHeader>
