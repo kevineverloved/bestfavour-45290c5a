@@ -4,6 +4,13 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 
+interface Area {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
 interface AvatarCropDialogProps {
   imageUrl: string;
   isOpen: boolean;
@@ -15,11 +22,11 @@ export function AvatarCropDialog({
   imageUrl,
   isOpen,
   onClose,
-  onCropComplete,
+  onCropComplete: handleCropComplete,
 }: AvatarCropDialogProps) {
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
-  const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
 
   const onCropChange = useCallback((location: { x: number; y: number }) => {
     setCrop(location);
@@ -29,7 +36,7 @@ export function AvatarCropDialog({
     setZoom(value[0]);
   }, []);
 
-  const onCropComplete = useCallback((_: any, croppedAreaPixels: any) => {
+  const onCropAreaComplete = useCallback((_: Area, croppedAreaPixels: Area) => {
     setCroppedAreaPixels(croppedAreaPixels);
   }, []);
 
@@ -62,7 +69,7 @@ export function AvatarCropDialog({
 
       canvas.toBlob((blob) => {
         if (blob) {
-          onCropComplete(blob);
+          handleCropComplete(blob);
         }
       }, 'image/jpeg', 0.95);
     } catch (error) {
@@ -84,7 +91,7 @@ export function AvatarCropDialog({
             aspect={1}
             onCropChange={onCropChange}
             onZoomChange={setZoom}
-            onCropComplete={onCropComplete}
+            onCropComplete={onCropAreaComplete}
           />
         </div>
         <div className="px-4">
