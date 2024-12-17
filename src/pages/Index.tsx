@@ -6,43 +6,41 @@ import { supabase } from "@/integrations/supabase/client";
 import { BurgerMenu } from "@/components/BurgerMenu";
 import { BottomNav } from "@/components/BottomNav";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Home, Tree, SprayCan, Truck, Wrench, Shield } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 
-const services = [
-  {
-    title: "Home Maintenance",
-    description: "Plumbing, electrical work, general repairs",
-    icon: "🏠"
-  },
-  {
-    title: "Garden Services",
-    description: "Lawn maintenance, tree trimming, landscaping",
-    icon: "🌿"
-  },
-  {
-    title: "Cleaning",
-    description: "Home cleaning, office cleaning, deep cleaning",
-    icon: "✨"
-  },
-  {
-    title: "Moving Help",
-    description: "Furniture moving, home relocations, heavy lifting",
-    icon: "📦"
-  },
-  {
-    title: "Handyman",
-    description: "Furniture assembly, mounting, installations",
-    icon: "🔧"
-  },
-  {
-    title: "Security",
-    description: "Gate motors, electric fencing, CCTV installation",
-    icon: "🔒"
-  }
-];
+interface ServiceCategory {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+}
+
+const iconMap = {
+  home: Home,
+  tree: Tree,
+  "spray-can": SprayCan,
+  truck: Truck,
+  wrench: Wrench,
+  shield: Shield,
+};
 
 const Index = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const isMobile = useIsMobile();
+
+  const { data: categories, isLoading } = useQuery({
+    queryKey: ['serviceCategories'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('service_categories')
+        .select('*')
+        .order('name');
+      
+      if (error) throw error;
+      return data as ServiceCategory[];
+    }
+  });
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -62,6 +60,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gray-50 pb-16 md:pb-0">
       {isAuthenticated && (isMobile ? <BottomNav /> : <BurgerMenu />)}
+      
       {/* Hero Section */}
       <div className="bg-white py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto text-center">
@@ -81,27 +80,40 @@ const Index = () => {
         </div>
       </div>
 
-      {/* Services Grid */}
+      {/* Service Categories Grid */}
       <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {services.map((service) => (
-            <Card key={service.title} className="hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <span className="text-2xl">{service.icon}</span>
-                  {service.title}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-500">{service.description}</p>
-                <Link to={isAuthenticated ? "/services" : "/auth"}>
-                  <Button className="mt-4 w-full" variant="outline">
-                    {isAuthenticated ? "Book Now" : "View Services"}
-                  </Button>
+          {isLoading ? (
+            // Loading skeleton
+            Array.from({ length: 6 }).map((_, i) => (
+              <Card key={i} className="animate-pulse">
+                <CardHeader className="h-32 bg-gray-200" />
+              </Card>
+            ))
+          ) : (
+            categories?.map((category) => {
+              const IconComponent = iconMap[category.icon as keyof typeof iconMap];
+              return (
+                <Link 
+                  key={category.id} 
+                  to={`/services/${category.id}`}
+                  className="transition-transform hover:scale-105"
+                >
+                  <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-3">
+                        <IconComponent className="h-6 w-6" />
+                        {category.name}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-gray-500">{category.description}</p>
+                    </CardContent>
+                  </Card>
                 </Link>
-              </CardContent>
-            </Card>
-          ))}
+              );
+            })
+          )}
         </div>
       </div>
     </div>
