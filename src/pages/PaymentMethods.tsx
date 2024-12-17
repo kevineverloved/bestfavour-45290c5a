@@ -1,27 +1,86 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, CreditCard, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+
+declare global {
+  interface Window {
+    YocoSDK: any;
+  }
+}
 
 const PaymentMethods = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
 
+  useEffect(() => {
+    // Load Yoco SDK
+    const script = document.createElement('script');
+    script.src = 'https://js.yoco.com/sdk/v1/yoco-sdk-web.js';
+    script.async = true;
+    document.head.appendChild(script);
+
+    return () => {
+      document.head.removeChild(script);
+    };
+  }, []);
+
   const handleAddCard = async () => {
     setIsLoading(true);
     try {
-      // Initialize Yoco payment here
-      toast({
-        title: "Coming soon",
-        description: "Payment method functionality will be available soon.",
+      const yoco = new window.YocoSDK({
+        publicKey: 'pk_test_ed3c54a6gOol69qa7f45',
       });
-    } catch (error) {
+
+      yoco.showPopup({
+        amountInCents: 100, // This is just for testing, will be updated with actual amount
+        currency: 'ZAR',
+        name: 'Add Payment Method',
+        description: 'Add a new payment method to your account',
+        callback: async function (result: any) {
+          if (result.error) {
+            toast({
+              title: "Error",
+              description: result.error.message,
+              variant: "destructive",
+            });
+            return;
+          }
+
+          // Token created successfully
+          try {
+            const { data, error } = await supabase.functions.invoke('create-payment', {
+              body: {
+                amount: 100,
+                currency: 'ZAR',
+                token: result.id
+              }
+            });
+
+            if (error) throw error;
+
+            toast({
+              title: "Success",
+              description: "Payment method added successfully",
+            });
+
+          } catch (error: any) {
+            toast({
+              title: "Error",
+              description: error.message,
+              variant: "destructive",
+            });
+          }
+        }
+      });
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to add payment method",
+        description: error.message,
         variant: "destructive",
       });
     } finally {
