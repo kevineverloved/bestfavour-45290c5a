@@ -9,17 +9,97 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { createClient } from '@supabase/supabase-js';
+import { useToast } from "@/hooks/use-toast";
+
+const supabase = createClient(
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_ANON_KEY
+);
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
+  const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const validateForm = () => {
+    if (!email || !password) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Please fill in all fields",
+      });
+      return false;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      toast({
+        variant: "destructive",
+        title: "Invalid Email",
+        description: "Please enter a valid email address",
+      });
+      return false;
+    }
+
+    if (password.length < 6) {
+      toast({
+        variant: "destructive",
+        title: "Invalid Password",
+        description: "Password must be at least 6 characters long",
+      });
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement authentication logic
-    console.log("Form submitted:", { email, password, isLogin });
+    
+    if (!validateForm()) return;
+    
+    setIsLoading(true);
+    try {
+      if (isLogin) {
+        const { error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+        
+        if (error) throw error;
+        
+        toast({
+          title: "Success",
+          description: "Logged in successfully",
+        });
+        navigate("/");
+      } else {
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+        });
+        
+        if (error) throw error;
+        
+        toast({
+          title: "Success",
+          description: "Please check your email to verify your account",
+        });
+      }
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "An error occurred",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -46,6 +126,7 @@ const Auth = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                disabled={isLoading}
               />
             </div>
             <div className="space-y-2">
@@ -56,10 +137,11 @@ const Auth = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                disabled={isLoading}
               />
             </div>
-            <Button type="submit" className="w-full">
-              {isLogin ? "Sign In" : "Sign Up"}
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? "Loading..." : isLogin ? "Sign In" : "Sign Up"}
             </Button>
           </form>
 
@@ -70,6 +152,7 @@ const Auth = () => {
                 <button
                   onClick={() => setIsLogin(false)}
                   className="text-primary hover:underline"
+                  disabled={isLoading}
                 >
                   Sign up
                 </button>
@@ -80,6 +163,7 @@ const Auth = () => {
                 <button
                   onClick={() => setIsLogin(true)}
                   className="text-primary hover:underline"
+                  disabled={isLoading}
                 >
                   Sign in
                 </button>
