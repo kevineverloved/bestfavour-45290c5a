@@ -12,18 +12,13 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import ServiceTypeSelection from "@/components/auth/ServiceTypeSelection";
 import ServiceProviderOnboarding from "@/components/auth/ServiceProviderOnboarding";
 
 // Check if environment variables are defined
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Supabase URL and Anon Key are required. Please connect your project to Supabase first.');
-}
-
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -35,6 +30,37 @@ const Auth = () => {
   
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  // If Supabase is not connected, show a message
+  if (!supabaseUrl || !supabaseAnonKey) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle>Connection Required</CardTitle>
+            <CardDescription>
+              Please connect your project to Supabase to enable authentication.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Alert>
+              <AlertDescription>
+                To connect to Supabase:
+                <ol className="list-decimal ml-4 mt-2">
+                  <li>Click on the Supabase menu in the top right corner</li>
+                  <li>Click "Connect to Supabase"</li>
+                  <li>Follow the prompts to complete the connection</li>
+                </ol>
+              </AlertDescription>
+            </Alert>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Initialize Supabase client only if credentials are available
+  const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
   const handleProviderFormComplete = async (providerData: any) => {
     try {
@@ -213,6 +239,7 @@ const Auth = () => {
       </Card>
     </div>
   );
+
 };
 
 export default Auth;
