@@ -1,16 +1,13 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
-import { Pencil, Upload } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { ProfileHeader } from "@/components/profile/ProfileHeader";
+import { ReviewsList } from "@/components/profile/ReviewsList";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -19,7 +16,6 @@ const Profile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     full_name: "",
-    bio: "",
   });
 
   const { data: session } = useQuery({
@@ -30,7 +26,7 @@ const Profile = () => {
     },
   });
 
-  const { data: profile, isLoading } = useQuery({
+  const { data: profile, isLoading: profileLoading } = useQuery({
     queryKey: ["profile", session?.user?.id],
     queryFn: async () => {
       if (!session?.user?.id) throw new Error("No user ID");
@@ -39,7 +35,28 @@ const Profile = () => {
         .from("profiles")
         .select("*")
         .eq("id", session.user.id)
-        .single(); // Add .single() to ensure we get exactly one row
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!session?.user?.id,
+  });
+
+  const { data: reviews, isLoading: reviewsLoading } = useQuery({
+    queryKey: ["reviews", session?.user?.id],
+    queryFn: async () => {
+      if (!session?.user?.id) throw new Error("No user ID");
+      
+      const { data, error } = await supabase
+        .from("reviews")
+        .select(`
+          *,
+          provider:service_providers (
+            business_name
+          )
+        `)
+        .eq("user_id", session.user.id);
 
       if (error) throw error;
       return data;
@@ -121,52 +138,33 @@ const Profile = () => {
     if (profile) {
       setFormData({
         full_name: profile.full_name || "",
-        bio: profile.bio || "",
       });
     }
   }, [session, profile, navigate]);
 
-  if (isLoading) {
+  if (profileLoading || reviewsLoading) {
     return <div>Loading...</div>;
   }
 
   return (
     <div className="container mx-auto py-8">
-      <Card>
-        <CardHeader>
-          <CardTitle>Profile</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col items-center space-y-4">
-            <div className="relative">
-              <Avatar className="h-24 w-24">
-                <AvatarImage src={profile?.avatar_url} />
-                <AvatarFallback>
-                  {profile?.full_name?.[0] || "U"}
-                </AvatarFallback>
-              </Avatar>
-              <label
-                htmlFor="avatar-upload"
-                className="absolute bottom-0 right-0 rounded-full bg-primary p-2 cursor-pointer"
-              >
-                <Upload className="h-4 w-4 text-white" />
-                <input
-                  id="avatar-upload"
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handleAvatarUpload}
-                />
-              </label>
-            </div>
+      <div className="space-y-6">
+        <ProfileHeader
+          avatarUrl={profile?.avatar_url}
+          fullName={profile?.full_name}
+          onEditClick={() => setIsEditing(true)}
+          onAvatarUpload={handleAvatarUpload}
+        />
 
-            {isEditing ? (
+        {isEditing ? (
+          <Card>
+            <CardContent className="p-6">
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
                   updateProfile.mutate(formData);
                 }}
-                className="w-full max-w-md space-y-4"
+                className="space-y-4"
               >
                 <div>
                   <Label htmlFor="full_name">Full Name</Label>
@@ -178,50 +176,25 @@ const Profile = () => {
                     }
                   />
                 </div>
-                <div>
-                  <Label htmlFor="bio">Bio</Label>
-                  <Textarea
-                    id="bio"
-                    value={formData.bio}
-                    onChange={(e) =>
-                      setFormData({ ...formData, bio: e.target.value })
-                    }
-                  />
-                </div>
                 <div className="flex justify-end space-x-2">
-                  <Button
+                  <button
                     type="button"
-                    variant="outline"
+                    className="btn btn-secondary"
                     onClick={() => setIsEditing(false)}
                   >
                     Cancel
-                  </Button>
-                  <Button type="submit">Save</Button>
+                  </button>
+                  <button type="submit" className="btn btn-primary">
+                    Save
+                  </button>
                 </div>
               </form>
-            ) : (
-              <div className="w-full max-w-md space-y-4">
-                <div>
-                  <Label>Full Name</Label>
-                  <p className="mt-1">{profile?.full_name || "Not set"}</p>
-                </div>
-                <div>
-                  <Label>Bio</Label>
-                  <p className="mt-1">{profile?.bio || "No bio yet"}</p>
-                </div>
-                <Button
-                  onClick={() => setIsEditing(true)}
-                  className="w-full"
-                  variant="outline"
-                >
-                  <Pencil className="mr-2 h-4 w-4" />
-                  Edit Profile
-                </Button>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+            </CardContent>
+          </Card>
+        ) : null}
+
+        <ReviewsList reviews={reviews || []} />
+      </div>
     </div>
   );
 };
