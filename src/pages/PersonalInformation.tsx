@@ -38,6 +38,8 @@ const PersonalInformation = () => {
   const handleSubmit = async (formData: {
     first_name: string;
     last_name: string;
+    email: string;
+    phone: string;
   }) => {
     if (!session?.user?.id) return;
 
@@ -47,6 +49,8 @@ const PersonalInformation = () => {
         .update({
           first_name: formData.first_name,
           last_name: formData.last_name,
+          email: formData.email,
+          phone: formData.phone,
         })
         .eq("id", session.user.id);
 
@@ -98,6 +102,8 @@ const PersonalInformation = () => {
             initialData={{
               first_name: profile?.first_name || "",
               last_name: profile?.last_name || "",
+              email: profile?.email || "",
+              phone: profile?.phone || "",
             }}
             onSubmit={handleSubmit}
             onCancel={() => navigate("/settings")}

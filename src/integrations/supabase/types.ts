@@ -64,30 +64,36 @@ export type Database = {
           avatar_url: string | null
           bio: string | null
           created_at: string
+          email: string | null
           first_name: string | null
           full_name: string | null
           id: string
           last_name: string | null
+          phone: string | null
           show_personal_info: boolean | null
         }
         Insert: {
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
+          email?: string | null
           first_name?: string | null
           full_name?: string | null
           id: string
           last_name?: string | null
+          phone?: string | null
           show_personal_info?: boolean | null
         }
         Update: {
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
+          email?: string | null
           first_name?: string | null
           full_name?: string | null
           id?: string
           last_name?: string | null
+          phone?: string | null
           show_personal_info?: boolean | null
         }
         Relationships: []
