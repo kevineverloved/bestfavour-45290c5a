@@ -22,7 +22,7 @@ export function ProfileHeader({
 }: ProfileHeaderProps) {
   const displayName = showPersonalInfo
     ? [firstName, lastName].filter(Boolean).join(" ")
-    : firstName || "Welcome!";
+    : firstName || "Anonymous User";
 
   const initials = firstName?.[0] || "U";
 
@@ -54,11 +54,7 @@ export function ProfileHeader({
           <div className="flex-1 text-center sm:text-left">
             <h2 className="text-2xl font-bold mb-2">{displayName}</h2>
             <p className="text-muted-foreground text-sm">
-              {firstName
-                ? showPersonalInfo
-                  ? "Sharing full profile"
-                  : "Sharing limited profile"
-                : "Complete your profile to get started"}
+              {showPersonalInfo ? "Sharing full profile" : "Sharing limited profile"}
             </p>
           </div>
           
