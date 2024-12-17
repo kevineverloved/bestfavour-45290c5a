@@ -8,6 +8,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ProfileHeader } from "@/components/profile/ProfileHeader";
 import { ReviewsList } from "@/components/profile/ReviewsList";
+import { AlertCircle } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -18,7 +20,7 @@ const Profile = () => {
     full_name: "",
   });
 
-  const { data: session } = useQuery({
+  const { data: session, isLoading: sessionLoading } = useQuery({
     queryKey: ["session"],
     queryFn: async () => {
       const { data } = await supabase.auth.getSession();
@@ -26,7 +28,7 @@ const Profile = () => {
     },
   });
 
-  const { data: profile, isLoading: profileLoading } = useQuery({
+  const { data: profile, isLoading: profileLoading, error: profileError } = useQuery({
     queryKey: ["profile", session?.user?.id],
     queryFn: async () => {
       if (!session?.user?.id) throw new Error("No user ID");
@@ -41,9 +43,10 @@ const Profile = () => {
       return data;
     },
     enabled: !!session?.user?.id,
+    retry: 1,
   });
 
-  const { data: reviews, isLoading: reviewsLoading } = useQuery({
+  const { data: reviews, isLoading: reviewsLoading, error: reviewsError } = useQuery({
     queryKey: ["reviews", session?.user?.id],
     queryFn: async () => {
       if (!session?.user?.id) throw new Error("No user ID");
@@ -62,6 +65,7 @@ const Profile = () => {
       return data;
     },
     enabled: !!session?.user?.id,
+    retry: 1,
   });
 
   const updateProfile = useMutation({
@@ -132,7 +136,7 @@ const Profile = () => {
   };
 
   useEffect(() => {
-    if (!session) {
+    if (!sessionLoading && !session) {
       navigate("/auth");
     }
     if (profile) {
@@ -140,10 +144,24 @@ const Profile = () => {
         full_name: profile.full_name || "",
       });
     }
-  }, [session, profile, navigate]);
+  }, [session, profile, navigate, sessionLoading]);
 
-  if (profileLoading || reviewsLoading) {
-    return <div>Loading...</div>;
+  if (sessionLoading || profileLoading) {
+    return <div className="container mx-auto py-8">Loading...</div>;
+  }
+
+  if (profileError) {
+    return (
+      <div className="container mx-auto py-8">
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>
+            Failed to load profile. Please try refreshing the page.
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
   }
 
   return (
@@ -193,7 +211,17 @@ const Profile = () => {
           </Card>
         ) : null}
 
-        <ReviewsList reviews={reviews || []} />
+        {reviewsError ? (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>
+              Failed to load reviews. Please try refreshing the page.
+            </AlertDescription>
+          </Alert>
+        ) : (
+          <ReviewsList reviews={reviews || []} isLoading={reviewsLoading} />
+        )}
       </div>
     </div>
   );
