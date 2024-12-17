@@ -7,16 +7,24 @@ import { BurgerMenu } from "@/components/BurgerMenu";
 import { BottomNav } from "@/components/BottomNav";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { 
-  Brush,          // For cleaning
-  Flower2,        // For garden services
-  Wrench,         // For handyman
-  Home,           // For home maintenance
-  Truck,          // For moving help
-  Shield,         // For security
-  Settings
+  Brush,
+  Flower2,
+  Wrench,
+  Home,
+  Truck,
+  Shield,
+  Settings,
+  X
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 
 interface ServiceCategory {
   id: string;
@@ -35,8 +43,16 @@ const iconMap: Record<string, React.ComponentType<any>> = {
   settings: Settings,
 };
 
+const testimonialImages = [
+  "https://images.unsplash.com/photo-1649972904349-6e44c42644a7",
+  "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d",
+  "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158",
+  "https://images.unsplash.com/photo-1519389950473-47ba0277781c",
+];
+
 const Index = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [showCarousel, setShowCarousel] = useState(true);
   const isMobile = useIsMobile();
 
   const { data: categories, isLoading } = useQuery({
@@ -71,21 +87,6 @@ const Index = () => {
     <div className="min-h-screen bg-gray-50 pb-16 md:pb-0">
       {!isMobile && <BurgerMenu />}
       
-      {/* Hero Section */}
-      <div className="bg-white py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto text-center">
-          <h1 className="text-4xl font-bold text-gray-900 sm:text-5xl md:text-6xl">
-          </h1>
-          {!isAuthenticated && (
-            <div className="mt-5 max-w-md mx-auto sm:flex sm:justify-center md:mt-8">
-              <Link to="/auth">
-                <Button size="lg">Get Started</Button>
-              </Link>
-            </div>
-          )}
-        </div>
-      </div>
-
       {/* Service Categories Grid */}
       <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
         <h2 className="text-2xl font-bold text-gray-900 mb-8">Browse Services</h2>
@@ -125,6 +126,42 @@ const Index = () => {
           )}
         </div>
       </div>
+
+      {/* Floating Carousel */}
+      {showCarousel && (
+        <div className="fixed bottom-20 right-4 z-50 w-80 bg-white rounded-lg shadow-xl overflow-hidden">
+          <div className="p-4 bg-primary text-white flex justify-between items-center">
+            <h3 className="font-semibold">Our Happy Customers</h3>
+            <button
+              onClick={() => setShowCarousel(false)}
+              className="text-white hover:text-gray-200 transition-colors"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+          <Carousel className="w-full max-w-xs mx-auto">
+            <CarouselContent>
+              {testimonialImages.map((image, index) => (
+                <CarouselItem key={index}>
+                  <div className="p-1">
+                    <Card>
+                      <CardContent className="flex aspect-square items-center justify-center p-2">
+                        <img
+                          src={`${image}?auto=format&fit=crop&w=300&h=300`}
+                          alt={`Happy customer ${index + 1}`}
+                          className="w-full h-full object-cover rounded-md"
+                        />
+                      </CardContent>
+                    </Card>
+                  </div>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <CarouselPrevious />
+            <CarouselNext />
+          </Carousel>
+        </div>
+      )}
       
       {isAuthenticated && isMobile && <BottomNav />}
     </div>
