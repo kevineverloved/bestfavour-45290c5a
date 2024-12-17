@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import ServiceCategory from "./pages/ServiceCategory";
+import BookingPage from "./pages/BookingPage";
 
 const queryClient = new QueryClient();
 
@@ -19,6 +20,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/services/:categoryId" element={<ServiceCategory />} />
+          <Route path="/book/:providerId" element={<BookingPage />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
