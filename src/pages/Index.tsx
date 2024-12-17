@@ -9,7 +9,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { 
   Car,
   Home,
-  Tools,
+  Wrench,
   Heart,
   Leaf,
   Book,
@@ -32,7 +32,7 @@ interface ServiceCategory {
 const iconMap: Record<string, React.ComponentType<any>> = {
   car: Car,
   house: Home,
-  tools: Tools,
+  tools: Wrench,
   heart: Heart,
   leaf: Leaf,
   book: Book,
