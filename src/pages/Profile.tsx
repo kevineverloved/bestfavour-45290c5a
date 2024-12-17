@@ -36,11 +36,23 @@ const Profile = () => {
       const { data, error } = await supabase
         .from("profiles")
         .select("*")
-        .eq("id", session.user.id)
-        .single();
+        .eq("id", session.user.id);
 
       if (error) throw error;
-      return data;
+      
+      // If no profile exists, create one
+      if (!data || data.length === 0) {
+        const { data: newProfile, error: createError } = await supabase
+          .from("profiles")
+          .insert([{ id: session.user.id }])
+          .select()
+          .single();
+          
+        if (createError) throw createError;
+        return newProfile;
+      }
+      
+      return data[0];
     },
     enabled: !!session?.user?.id,
     retry: 1,
