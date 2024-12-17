@@ -127,6 +127,7 @@ export function ProfileContent({
           avatarUrl={profile?.avatar_url}
           firstName={profile?.first_name}
           lastName={profile?.last_name}
+          showPersonalInfo={profile?.show_personal_info}
           onEditClick={() => setIsEditing(true)}
           onAvatarUpload={handleAvatarUpload}
         />
