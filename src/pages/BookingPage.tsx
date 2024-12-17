@@ -45,10 +45,11 @@ const BookingPage = () => {
       
       return data;
     },
-    retry: false,
-    onError: (error) => {
-      toast.error(error instanceof Error ? error.message : 'Failed to load provider details');
-      navigate('/');
+    meta: {
+      onError: (error: Error) => {
+        toast.error(error.message || 'Failed to load provider details');
+        navigate('/');
+      }
     }
   });
 
