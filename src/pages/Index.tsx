@@ -41,10 +41,10 @@ const Index = () => {
       <div className="bg-white py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto text-center">
           <h1 className="text-4xl font-bold text-gray-900 sm:text-5xl md:text-6xl">
-            Vuka Works
+            Best Favour
           </h1>
           <p className="mt-3 max-w-md mx-auto text-base text-gray-500 sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
-            Rise up and get things done! Find trusted local professionals across South Africa.
+            Your trusted community of local professionals across South Africa, ready to help!
           </p>
           <div className="mt-5 max-w-md mx-auto sm:flex sm:justify-center md:mt-8">
             <Button className="w-full sm:w-auto">
