@@ -7,13 +7,12 @@ import { BurgerMenu } from "@/components/BurgerMenu";
 import { BottomNav } from "@/components/BottomNav";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { 
-  Wrench,
-  Scissors,
-  Laptop,
-  Car,
-  UtensilsCrossed,
-  Briefcase,
-  Home,
+  Brush,          // For cleaning
+  Flower2,        // For garden services
+  Wrench,         // For handyman
+  Home,           // For home maintenance
+  Truck,          // For moving help
+  Shield,         // For security
   Settings
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
@@ -27,13 +26,12 @@ interface ServiceCategory {
 }
 
 const iconMap: Record<string, React.ComponentType<any>> = {
-  car: Car,
-  house: Home,
-  tools: Wrench,
-  scissors: Scissors,
-  laptop: Laptop,
-  food: UtensilsCrossed,
-  briefcase: Briefcase,
+  brush: Brush,
+  flower: Flower2,
+  wrench: Wrench,
+  home: Home,
+  truck: Truck,
+  shield: Shield,
   settings: Settings,
 };
 
