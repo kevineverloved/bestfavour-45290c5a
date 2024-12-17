@@ -6,8 +6,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { BurgerMenu } from "@/components/BurgerMenu";
 import { BottomNav } from "@/components/BottomNav";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Home, TreePine, SprayCan, Truck, Wrench, Shield } from "lucide-react";
+import { Briefcase, Home, Car, Heart, ShoppingCart, Settings } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface ServiceCategory {
   id: string;
@@ -16,13 +17,13 @@ interface ServiceCategory {
   icon: string;
 }
 
-const iconMap = {
+const iconMap: Record<string, React.ComponentType<any>> = {
+  briefcase: Briefcase,
   home: Home,
-  tree: TreePine,
-  "spray-can": SprayCan,
-  truck: Truck,
-  wrench: Wrench,
-  shield: Shield,
+  car: Car,
+  heart: Heart,
+  "shopping-cart": ShoppingCart,
+  settings: Settings,
 };
 
 const Index = () => {
@@ -65,10 +66,10 @@ const Index = () => {
       <div className="bg-white py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto text-center">
           <h1 className="text-4xl font-bold text-gray-900 sm:text-5xl md:text-6xl">
-            Best Favour
+            Find Local Services
           </h1>
           <p className="mt-3 max-w-md mx-auto text-base text-gray-500 sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
-            Your trusted community of local professionals across South Africa, ready to help!
+            Connect with trusted service providers in your area
           </p>
           {!isAuthenticated && (
             <div className="mt-5 max-w-md mx-auto sm:flex sm:justify-center md:mt-8">
@@ -82,15 +83,20 @@ const Index = () => {
 
       {/* Service Categories Grid */}
       <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-        <h2 className="text-2xl font-bold text-gray-900 mb-8">Our Services</h2>
+        <h2 className="text-2xl font-bold text-gray-900 mb-8">Browse Services</h2>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {isLoading ? (
-            Array.from({ length: 8 }).map((_, i) => (
-              <Card key={i} className="h-32 animate-pulse bg-gray-100" />
+            Array.from({ length: 6 }).map((_, i) => (
+              <Card key={i} className="h-32">
+                <CardContent className="h-full flex flex-col items-center justify-center p-4">
+                  <Skeleton className="h-12 w-12 rounded-full" />
+                  <Skeleton className="h-4 w-24 mt-2" />
+                </CardContent>
+              </Card>
             ))
           ) : (
             categories?.map((category) => {
-              const IconComponent = iconMap[category.icon as keyof typeof iconMap];
+              const IconComponent = iconMap[category.icon] || Settings;
               return (
                 <Link 
                   key={category.id} 
@@ -99,9 +105,7 @@ const Index = () => {
                 >
                   <Card className="h-32 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
                     <CardContent className="h-full flex flex-col items-center justify-center p-4">
-                      {IconComponent && (
-                        <IconComponent className="h-8 w-8 mb-2 text-primary group-hover:scale-110 transition-transform" />
-                      )}
+                      <IconComponent className="h-12 w-12 mb-2 text-primary group-hover:scale-110 transition-transform" />
                       <span className="text-center font-medium text-gray-900">
                         {category.name}
                       </span>
