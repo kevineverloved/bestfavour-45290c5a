@@ -2,10 +2,11 @@ import { useState } from 'react';
 import { ChevronRight, ChevronLeft } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { EligibilityStep } from './provider/EligibilityStep';
+import { PersonalInfoStep } from './provider/PersonalInfoStep';
+import { ServiceSelectionStep } from './provider/ServiceSelectionStep';
+import { AvailabilityStep } from './provider/AvailabilityStep';
+import { VerificationStep } from './provider/VerificationStep';
 
 const steps = [
   { id: 'eligibility', title: 'Eligibility' },
@@ -13,7 +14,7 @@ const steps = [
   { id: 'service-selection', title: 'Service Selection' },
   { id: 'availability', title: 'Availability' },
   { id: 'verification', title: 'Verification' },
-]
+];
 
 const serviceCategories = {
   'Home Services': [
@@ -96,7 +97,7 @@ const serviceCategories = {
 }
 
 export default function ServiceProviderOnboarding({ onComplete }: { onComplete: (data: any) => void }) {
-  const [currentStep, setCurrentStep] = useState(0)
+  const [currentStep, setCurrentStep] = useState(0);
   const [formData, setFormData] = useState({
     isSouthAfrican: '',
     fullName: '',
@@ -115,161 +116,184 @@ export default function ServiceProviderOnboarding({ onComplete }: { onComplete: 
     idDocument: null as File | null,
     proofOfAddress: null as File | null,
     consentToBackgroundCheck: false,
-  })
-  const [errors, setErrors] = useState<{ [key: string]: string }>({})
+  });
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setFormData(prevData => ({ ...prevData, [name]: value }))
-  }
+    const { name, value } = e.target;
+    setFormData(prevData => ({ ...prevData, [name]: value }));
+  };
 
   const handleCheckboxChange = (name: string, checked: boolean) => {
-    setFormData(prevData => ({ ...prevData, [name]: checked }))
-  }
+    setFormData(prevData => ({ ...prevData, [name]: checked }));
+  };
 
   const handleMultiSelectChange = (name: string, value: string) => {
     setFormData(prevData => {
-      const updatedValues = prevData[name as keyof typeof prevData] as string[]
+      const updatedValues = prevData[name as keyof typeof prevData] as string[];
       const newValues = updatedValues.includes(value)
         ? updatedValues.filter(item => item !== value)
-        : [...updatedValues, value]
-      return { ...prevData, [name]: newValues }
-    })
-  }
+        : [...updatedValues, value];
+      return { ...prevData, [name]: newValues };
+    });
+  };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, files } = e.target
+    const { name, files } = e.target;
     if (files && files[0]) {
-      const file = files[0]
+      const file = files[0];
       if (file.size > 10 * 1024 * 1024) {
-        setErrors(prev => ({ ...prev, [name]: "File size must be less than 10MB" }))
-        return
+        setErrors(prev => ({ ...prev, [name]: "File size must be less than 10MB" }));
+        return;
       }
       if (!['image/jpeg', 'image/png'].includes(file.type)) {
-        setErrors(prev => ({ ...prev, [name]: "Only JPG and PNG files are allowed" }))
-        return
+        setErrors(prev => ({ ...prev, [name]: "Only JPG and PNG files are allowed" }));
+        return;
       }
-      const img = new Image()
+      const img = new Image();
       img.onload = () => {
         if (img.width * img.height < 640 * 480) {
-          setErrors(prev => ({ ...prev, [name]: "Image resolution must be at least 480p" }))
+          setErrors(prev => ({ ...prev, [name]: "Image resolution must be at least 480p" }));
         } else {
-          setFormData(prevData => ({ ...prevData, [name]: file }))
-          setErrors(prev => ({ ...prev, [name]: "" }))
+          setFormData(prevData => ({ ...prevData, [name]: file }));
+          setErrors(prev => ({ ...prev, [name]: "" }));
         }
-      }
-      img.src = URL.createObjectURL(file)
+      };
+      img.src = URL.createObjectURL(file);
     }
-  }
+  };
+
+  const validateStep = () => {
+    const newErrors: { [key: string]: string } = {};
+    switch (currentStep) {
+      case 0:
+        if (formData.isSouthAfrican !== 'yes') {
+          newErrors.isSouthAfrican = "You must be a South African citizen or permanent resident";
+        }
+        break;
+      case 1:
+        if (!formData.fullName) newErrors.fullName = "Full name is required";
+        if (!formData.idNumber) {
+          newErrors.idNumber = "ID number is required";
+        } else if (formData.idNumber.length < 13) {
+          newErrors.idNumber = "Please enter a valid ID number (13 digits)";
+        }
+        if (!formData.dateOfBirth) {
+          newErrors.dateOfBirth = "Date of birth is required";
+        } else {
+          const birthDate = new Date(formData.dateOfBirth);
+          const today = new Date();
+          let age = today.getFullYear() - birthDate.getFullYear();
+          const m = today.getMonth() - birthDate.getMonth();
+          if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+            age--;
+          }
+          if (age < 16) {
+            newErrors.dateOfBirth = "You must be at least 16 years old to register";
+          }
+        }
+        if (!formData.phoneNumber) newErrors.phoneNumber = "Phone number is required";
+        if (!formData.email) newErrors.email = "Email is required";
+        if (!formData.streetAddress) newErrors.streetAddress = "Street address is required";
+        if (!formData.city) newErrors.city = "City is required";
+        if (!formData.postalCode) newErrors.postalCode = "Postal code is required";
+        if (!formData.province) newErrors.province = "Province is required";
+        break;
+      case 2:
+        if (!formData.serviceCategory) newErrors.serviceCategory = "Service category is required";
+        if (!formData.specificService) newErrors.specificService = "Specific service is required";
+        break;
+      case 3:
+        if (formData.availability.length === 0) 
+          newErrors.availability = "Availability is required";
+        break;
+    }
+    setErrors(newErrors);
+  };
+
+  const isStepComplete = () => {
+    return Object.keys(errors).length === 0;
+  };
 
   const handleNext = () => {
     if (isStepComplete()) {
       if (currentStep < steps.length - 1) {
-        setCurrentStep(currentStep + 1)
+        setCurrentStep(currentStep + 1);
       }
     } else {
-      validateStep()
+      validateStep();
     }
-  }
+  };
 
   const handlePrevious = () => {
     if (currentStep > 0) {
-      setCurrentStep(currentStep - 1)
+      setCurrentStep(currentStep - 1);
     }
-  }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     if (isStepComplete()) {
-      console.log('Form submitted:', formData)
-      alert('Thanks for applying! We\'ll review your info and get back to you soon.')
+      console.log('Form submitted:', formData);
+      onComplete(formData);
     } else {
-      validateStep()
+      validateStep();
     }
-  }
+  };
 
-  const validateStep = () => {
-    const newErrors: { [key: string]: string } = {}
+  const renderStep = () => {
     switch (currentStep) {
       case 0:
-        if (formData.isSouthAfrican !== 'yes') {
-          newErrors.isSouthAfrican = "You must be a South African citizen or permanent resident"
-        }
-        break
+        return (
+          <EligibilityStep
+            isSouthAfrican={formData.isSouthAfrican}
+            setFormData={setFormData}
+            errors={errors}
+          />
+        );
       case 1:
-        if (!formData.fullName) newErrors.fullName = "Full name is required"
-        if (!formData.idNumber) {
-          newErrors.idNumber = "ID number is required"
-        } else if (formData.idNumber.length < 13) {
-          newErrors.idNumber = "Please enter a valid ID number (13 digits)"
-        }
-        if (!formData.dateOfBirth) {
-          newErrors.dateOfBirth = "Date of birth is required"
-        } else {
-          const birthDate = new Date(formData.dateOfBirth)
-          const today = new Date()
-          let age = today.getFullYear() - birthDate.getFullYear()
-          const m = today.getMonth() - birthDate.getMonth()
-          if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-            age--
-          }
-          if (age < 16) {
-            newErrors.dateOfBirth = "You must be at least 16 years old to register"
-          }
-        }
-        if (!formData.phoneNumber) newErrors.phoneNumber = "Phone number is required"
-        if (!formData.email) newErrors.email = "Email is required"
-        if (!formData.streetAddress) newErrors.streetAddress = "Street address is required"
-        if (!formData.city) newErrors.city = "City is required"
-        if (!formData.postalCode) newErrors.postalCode = "Postal code is required"
-        if (!formData.province) newErrors.province = "Province is required"
-        break
+        return (
+          <PersonalInfoStep
+            formData={formData}
+            handleInputChange={handleInputChange}
+            errors={errors}
+          />
+        );
       case 2:
-        if (!formData.serviceCategory) newErrors.serviceCategory = "Service category is required"
-        if (!formData.specificService) newErrors.specificService = "Specific service is required"
-        break
+        return (
+          <ServiceSelectionStep
+            formData={formData}
+            serviceCategories={serviceCategories}
+            handleInputChange={handleInputChange}
+            errors={errors}
+          />
+        );
       case 3:
-        if (formData.availability.length === 0) 
-          newErrors.availability = "Availability is required"
-        break;
-      // Add more validation for other steps as needed
+        return (
+          <AvailabilityStep
+            availability={formData.availability}
+            handleMultiSelectChange={handleMultiSelectChange}
+            errors={errors}
+          />
+        );
+      case 4:
+        return (
+          <VerificationStep
+            formData={formData}
+            handleFileChange={handleFileChange}
+            handleCheckboxChange={handleCheckboxChange}
+            errors={errors}
+          />
+        );
+      default:
+        return null;
     }
-    setErrors(newErrors)
-  }
-
-  const isStepComplete = () => {
-    return Object.keys(errors).length === 0;
-  }
+  };
 
   return (
     <Card>
       <CardContent className="space-y-4 pt-6">
-        {currentStep === 0 && (
-          <div className="space-y-4">
-            <Label>Are you a South African citizen or permanent resident?</Label>
-            <RadioGroup
-              value={formData.isSouthAfrican}
-              onValueChange={(value) => setFormData(prev => ({ ...prev, isSouthAfrican: value }))}
-            >
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="yes" id="yes" />
-                <Label htmlFor="yes">Yes</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="no" id="no" />
-                <Label htmlFor="no">No</Label>
-              </div>
-            </RadioGroup>
-            {errors.isSouthAfrican && (
-              <Alert variant="destructive">
-                <AlertDescription>{errors.isSouthAfrican}</AlertDescription>
-              </Alert>
-            )}
-          </div>
-        )}
-
-        {/* Additional steps would go here, similar to the eligibility step */}
-
+        {renderStep()}
         <div className="flex justify-between mt-6">
           {currentStep > 0 && (
             <Button onClick={handlePrevious} variant="outline">
@@ -289,4 +313,4 @@ export default function ServiceProviderOnboarding({ onComplete }: { onComplete: 
       </CardContent>
     </Card>
   );
-};
+}
