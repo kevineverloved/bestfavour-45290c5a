@@ -15,10 +15,15 @@ import { Label } from "@/components/ui/label";
 import ServiceTypeSelection from "@/components/auth/ServiceTypeSelection";
 import ServiceProviderOnboarding from "@/components/auth/ServiceProviderOnboarding";
 
-const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL,
-  import.meta.env.VITE_SUPABASE_ANON_KEY
-);
+// Check if environment variables are defined
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+if (!supabaseUrl || !supabaseAnonKey) {
+  throw new Error('Supabase URL and Anon Key are required. Please connect your project to Supabase first.');
+}
+
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
