@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { Pencil, Upload } from "lucide-react";
@@ -33,11 +33,13 @@ const Profile = () => {
   const { data: profile, isLoading } = useQuery({
     queryKey: ["profile", session?.user?.id],
     queryFn: async () => {
+      if (!session?.user?.id) throw new Error("No user ID");
+      
       const { data, error } = await supabase
         .from("profiles")
         .select("*")
-        .eq("id", session?.user?.id)
-        .single();
+        .eq("id", session.user.id)
+        .single(); // Add .single() to ensure we get exactly one row
 
       if (error) throw error;
       return data;
@@ -47,10 +49,12 @@ const Profile = () => {
 
   const updateProfile = useMutation({
     mutationFn: async (data: typeof formData) => {
+      if (!session?.user?.id) throw new Error("No user ID");
+      
       const { error } = await supabase
         .from("profiles")
         .update(data)
-        .eq("id", session?.user?.id);
+        .eq("id", session.user.id);
 
       if (error) throw error;
     },
@@ -74,11 +78,11 @@ const Profile = () => {
 
   const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (!file) return;
+    if (!file || !session?.user?.id) return;
 
     try {
       const fileExt = file.name.split(".").pop();
-      const filePath = `${session?.user?.id}/avatar.${fileExt}`;
+      const filePath = `${session.user.id}/avatar.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
         .from("avatars")
@@ -93,7 +97,7 @@ const Profile = () => {
       await supabase
         .from("profiles")
         .update({ avatar_url: publicUrl })
-        .eq("id", session?.user?.id);
+        .eq("id", session.user.id);
 
       queryClient.invalidateQueries({ queryKey: ["profile"] });
       toast({
