@@ -24,13 +24,30 @@ const AuthForm = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
+  const getFriendlyErrorMessage = (error: any) => {
+    const message = error.message.toLowerCase();
+    if (message.includes("email already registered")) {
+      return "This email is already registered. Please try logging in instead.";
+    }
+    if (message.includes("invalid login credentials")) {
+      return "Invalid email or password. Please try again.";
+    }
+    if (message.includes("password")) {
+      return "Password should be at least 6 characters long.";
+    }
+    if (message.includes("email")) {
+      return "Please enter a valid email address.";
+    }
+    return "Something went wrong. Please try again.";
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!email || !password) {
       toast({
         variant: "destructive",
-        title: "Error",
+        title: "Missing Information",
         description: "Please fill in all required fields",
       });
       return;
@@ -47,8 +64,8 @@ const AuthForm = () => {
         if (error) throw error;
         
         toast({
-          title: "Success",
-          description: "Logged in successfully",
+          title: "Welcome back!",
+          description: "You've successfully logged in",
         });
         navigate("/");
       } else {
@@ -65,15 +82,16 @@ const AuthForm = () => {
         if (error) throw error;
         
         toast({
-          title: "Success",
-          description: "Please check your email to verify your account",
+          title: "Success!",
+          description: "Welcome to Best Favour! You can now start exploring services.",
         });
+        navigate("/");
       }
     } catch (error: any) {
       toast({
         variant: "destructive",
         title: "Error",
-        description: error.message || "An error occurred",
+        description: getFriendlyErrorMessage(error),
       });
     } finally {
       setIsLoading(false);

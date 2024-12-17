@@ -1,6 +1,8 @@
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
 const services = [
   {
@@ -36,6 +38,23 @@ const services = [
 ];
 
 const Index = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setIsAuthenticated(!!session);
+    };
+
+    checkAuth();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsAuthenticated(!!session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
@@ -48,9 +67,9 @@ const Index = () => {
             Your trusted community of local professionals across South Africa, ready to help!
           </p>
           <div className="mt-5 max-w-md mx-auto sm:flex sm:justify-center md:mt-8 gap-4">
-            <Link to="/auth">
+            <Link to={isAuthenticated ? "/services" : "/auth"}>
               <Button>
-                Get Started
+                {isAuthenticated ? "Book Service Now" : "Get Started"}
               </Button>
             </Link>
           </div>
@@ -70,9 +89,9 @@ const Index = () => {
               </CardHeader>
               <CardContent>
                 <p className="text-gray-500">{service.description}</p>
-                <Link to="/auth">
+                <Link to={isAuthenticated ? "/services" : "/auth"}>
                   <Button className="mt-4 w-full" variant="outline">
-                    View Services
+                    {isAuthenticated ? "Book Now" : "View Services"}
                   </Button>
                 </Link>
               </CardContent>
