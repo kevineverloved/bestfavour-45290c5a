@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { BurgerMenu } from "@/components/BurgerMenu";
 
 const services = [
   {
@@ -57,6 +58,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {isAuthenticated && <BurgerMenu />}
       {/* Hero Section */}
       <div className="bg-white py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto text-center">
