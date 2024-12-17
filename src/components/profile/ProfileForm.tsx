@@ -3,18 +3,29 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Save, X } from "lucide-react";
 
 interface ProfileFormProps {
   initialData: {
-    full_name: string;
+    first_name: string | null;
+    last_name: string | null;
+    show_personal_info: boolean | null;
   };
-  onSubmit: (data: { full_name: string }) => void;
+  onSubmit: (data: {
+    first_name: string;
+    last_name: string;
+    show_personal_info: boolean;
+  }) => void;
   onCancel: () => void;
 }
 
 export function ProfileForm({ initialData, onSubmit, onCancel }: ProfileFormProps) {
-  const [formData, setFormData] = useState(initialData);
+  const [formData, setFormData] = useState({
+    first_name: initialData.first_name || "",
+    last_name: initialData.last_name || "",
+    show_personal_info: initialData.show_personal_info || false,
+  });
 
   return (
     <Card>
@@ -29,23 +40,52 @@ export function ProfileForm({ initialData, onSubmit, onCancel }: ProfileFormProp
           }}
           className="space-y-6"
         >
-          <div className="space-y-2">
-            <Label htmlFor="full_name">Full Name</Label>
-            <Input
-              id="full_name"
-              placeholder="Enter your full name"
-              value={formData.full_name}
-              onChange={(e) =>
-                setFormData({ ...formData, full_name: e.target.value })
+          <div className="grid gap-6 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="first_name">First Name</Label>
+              <Input
+                id="first_name"
+                placeholder="Enter your first name"
+                value={formData.first_name}
+                onChange={(e) =>
+                  setFormData({ ...formData, first_name: e.target.value })
+                }
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="last_name">Last Name</Label>
+              <Input
+                id="last_name"
+                placeholder="Enter your last name"
+                value={formData.last_name}
+                onChange={(e) =>
+                  setFormData({ ...formData, last_name: e.target.value })
+                }
+              />
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="show_personal_info"
+              checked={formData.show_personal_info}
+              onCheckedChange={(checked) =>
+                setFormData({
+                  ...formData,
+                  show_personal_info: checked as boolean,
+                })
               }
             />
-          </div>
-          <div className="flex justify-end gap-3">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onCancel}
+            <Label
+              htmlFor="show_personal_info"
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
             >
+              Display my full name publicly
+            </Label>
+          </div>
+
+          <div className="flex justify-end gap-3">
+            <Button type="button" variant="outline" onClick={onCancel}>
               <X className="h-4 w-4 mr-2" />
               Cancel
             </Button>

@@ -5,12 +5,27 @@ import { Camera, Edit } from "lucide-react";
 
 interface ProfileHeaderProps {
   avatarUrl?: string | null;
-  fullName?: string | null;
+  firstName?: string | null;
+  lastName?: string | null;
+  showPersonalInfo?: boolean | null;
   onEditClick: () => void;
   onAvatarUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-export function ProfileHeader({ avatarUrl, fullName, onEditClick, onAvatarUpload }: ProfileHeaderProps) {
+export function ProfileHeader({
+  avatarUrl,
+  firstName,
+  lastName,
+  showPersonalInfo,
+  onEditClick,
+  onAvatarUpload,
+}: ProfileHeaderProps) {
+  const displayName = showPersonalInfo
+    ? [firstName, lastName].filter(Boolean).join(" ")
+    : firstName || "Welcome!";
+
+  const initials = firstName?.[0] || "U";
+
   return (
     <Card className="bg-gradient-to-r from-primary/10 via-primary/5 to-background border-none shadow-md">
       <CardContent className="p-6 sm:p-8">
@@ -18,7 +33,7 @@ export function ProfileHeader({ avatarUrl, fullName, onEditClick, onAvatarUpload
           <div className="relative group">
             <Avatar className="h-24 w-24 sm:h-32 sm:w-32 ring-2 ring-background shadow-xl">
               <AvatarImage src={avatarUrl || undefined} className="object-cover" />
-              <AvatarFallback className="text-2xl">{fullName?.[0] || "U"}</AvatarFallback>
+              <AvatarFallback className="text-2xl">{initials}</AvatarFallback>
             </Avatar>
             <label
               htmlFor="avatar-upload"
@@ -37,11 +52,13 @@ export function ProfileHeader({ avatarUrl, fullName, onEditClick, onAvatarUpload
           </div>
           
           <div className="flex-1 text-center sm:text-left">
-            <h2 className="text-2xl font-bold mb-2">
-              {fullName || "Welcome!"}
-            </h2>
+            <h2 className="text-2xl font-bold mb-2">{displayName}</h2>
             <p className="text-muted-foreground text-sm">
-              {fullName ? "Member" : "Complete your profile to get started"}
+              {firstName
+                ? showPersonalInfo
+                  ? "Sharing full profile"
+                  : "Sharing limited profile"
+                : "Complete your profile to get started"}
             </p>
           </div>
           

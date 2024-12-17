@@ -64,12 +64,20 @@ const Profile = () => {
   });
 
   const updateProfile = useMutation({
-    mutationFn: async (data: { full_name: string }) => {
+    mutationFn: async (data: {
+      first_name: string;
+      last_name: string;
+      show_personal_info: boolean;
+    }) => {
       if (!session?.user?.id) throw new Error("No user ID");
       
       const { error } = await supabase
         .from("profiles")
-        .upsert({ id: session.user.id, ...data });
+        .upsert({
+          id: session.user.id,
+          ...data,
+          full_name: `${data.first_name} ${data.last_name}`.trim(),
+        });
 
       if (error) throw error;
     },
@@ -156,7 +164,9 @@ const Profile = () => {
       <div className="space-y-8">
         <ProfileHeader
           avatarUrl={profile?.avatar_url}
-          fullName={profile?.full_name}
+          firstName={profile?.first_name}
+          lastName={profile?.last_name}
+          showPersonalInfo={profile?.show_personal_info}
           onEditClick={() => setIsEditing(true)}
           onAvatarUpload={handleAvatarUpload}
         />
@@ -171,7 +181,9 @@ const Profile = () => {
             {isEditing ? (
               <ProfileForm
                 initialData={{
-                  full_name: profile?.full_name || "",
+                  first_name: profile?.first_name || "",
+                  last_name: profile?.last_name || "",
+                  show_personal_info: profile?.show_personal_info || false,
                 }}
                 onSubmit={(data) => updateProfile.mutate(data)}
                 onCancel={() => setIsEditing(false)}
@@ -180,11 +192,9 @@ const Profile = () => {
               <div className="bg-card rounded-lg shadow-sm p-6">
                 <h3 className="text-lg font-semibold mb-4">About Me</h3>
                 <p className="text-muted-foreground">
-                  {profile?.full_name ? (
-                    `Hi, I'm ${profile.full_name}!`
-                  ) : (
-                    "No profile information available yet. Click 'Edit Profile' to add your details."
-                  )}
+                  {profile?.first_name
+                    ? `Hi, I'm ${profile.first_name}!`
+                    : "No profile information available yet. Click 'Edit Profile' to add your details."}
                 </p>
               </div>
             )}
@@ -201,6 +211,6 @@ const Profile = () => {
       </div>
     </div>
   );
-};
+}
 
 export default Profile;
