@@ -8,6 +8,7 @@ import Auth from "./pages/Auth";
 import ServiceCategory from "./pages/ServiceCategory";
 import BookingPage from "./pages/BookingPage";
 import BookingsPage from "./pages/BookingsPage";
+import Profile from "./pages/Profile";
 
 const queryClient = new QueryClient();
 
@@ -23,6 +24,7 @@ const App = () => (
           <Route path="/services/:categoryId" element={<ServiceCategory />} />
           <Route path="/book/:providerId" element={<BookingPage />} />
           <Route path="/bookings" element={<BookingsPage />} />
+          <Route path="/profile" element={<Profile />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
