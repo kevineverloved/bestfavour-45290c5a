@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import ServiceCategory from "./pages/ServiceCategory";
 import BookingPage from "./pages/BookingPage";
+import BookingsPage from "./pages/BookingsPage";
 
 const queryClient = new QueryClient();
 
@@ -21,6 +22,7 @@ const App = () => (
           <Route path="/auth" element={<Auth />} />
           <Route path="/services/:categoryId" element={<ServiceCategory />} />
           <Route path="/book/:providerId" element={<BookingPage />} />
+          <Route path="/bookings" element={<BookingsPage />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
