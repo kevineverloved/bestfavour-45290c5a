@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,18 +17,6 @@ const PaymentMethods = () => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    // Load Yoco SDK
-    const script = document.createElement('script');
-    script.src = 'https://js.yoco.com/sdk/v1/yoco-sdk-web.js';
-    script.async = true;
-    document.head.appendChild(script);
-
-    return () => {
-      document.head.removeChild(script);
-    };
-  }, []);
-
   const handleAddCard = async () => {
     setIsLoading(true);
     try {
@@ -37,10 +25,9 @@ const PaymentMethods = () => {
       });
 
       yoco.showPopup({
-        amountInCents: 200, // Minimum amount required by Yoco
         currency: 'ZAR',
         name: 'Add Payment Method',
-        description: 'Add a new payment method to your account',
+        description: 'Verify your card for future bookings',
         callback: async function (result: any) {
           if (result.error) {
             toast({
@@ -55,9 +42,8 @@ const PaymentMethods = () => {
           try {
             const { data, error } = await supabase.functions.invoke('create-payment', {
               body: {
-                amount: 200,
-                currency: 'ZAR',
-                token: result.id
+                token: result.id,
+                verifyOnly: true
               }
             });
 
