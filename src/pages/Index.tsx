@@ -97,7 +97,7 @@ const Index = () => {
                 return (
                   <Link 
                     key={category.id} 
-                    to={`/services/${category.id}`}
+                    to={`/category/${category.id}`}
                     className="transition-transform hover:scale-105"
                   >
                     <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer">
