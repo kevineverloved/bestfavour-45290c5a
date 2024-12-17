@@ -7,10 +7,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Star } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import { BurgerMenu } from "@/components/BurgerMenu";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { BottomNav } from "@/components/BottomNav";
 
 const ServiceCategory = () => {
   const { categoryId } = useParams();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
 
   const { data: category, isLoading: categoryLoading } = useQuery({
     queryKey: ['serviceCategory', categoryId],
@@ -46,11 +50,19 @@ const ServiceCategory = () => {
   });
 
   if (categoryLoading || providersLoading) {
-    return <div className="p-8">Loading...</div>;
+    return (
+      <div className="p-8">
+        {!isMobile && <BurgerMenu />}
+        Loading...
+        {isMobile && <BottomNav />}
+      </div>
+    );
   }
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-8">
+      {!isMobile && <BurgerMenu />}
+      
       {/* Header */}
       <div className="mb-6">
         <Button 
@@ -105,6 +117,8 @@ const ServiceCategory = () => {
           </div>
         )}
       </div>
+      
+      {isMobile && <BottomNav />}
     </div>
   );
 };

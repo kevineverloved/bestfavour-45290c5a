@@ -4,9 +4,13 @@ import { useQuery } from "@tanstack/react-query";
 import { ProfileError } from "@/components/profile/ProfileError";
 import { ProfileLoading } from "@/components/profile/ProfileLoading";
 import { ProfileContent } from "@/components/profile/ProfileContent";
+import { BurgerMenu } from "@/components/BurgerMenu";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { BottomNav } from "@/components/BottomNav";
 
 const Profile = () => {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
 
   const { data: session, isLoading: sessionLoading } = useQuery({
     queryKey: ["session"],
@@ -56,7 +60,13 @@ const Profile = () => {
   });
 
   if (sessionLoading || profileLoading) {
-    return <ProfileLoading />;
+    return (
+      <>
+        {!isMobile && <BurgerMenu />}
+        <ProfileLoading />
+        {isMobile && <BottomNav />}
+      </>
+    );
   }
 
   if (!session) {
@@ -67,19 +77,25 @@ const Profile = () => {
   if (profileError) {
     return (
       <div className="container mx-auto py-8">
+        {!isMobile && <BurgerMenu />}
         <ProfileError message="Failed to load profile. Please try refreshing the page." />
+        {isMobile && <BottomNav />}
       </div>
     );
   }
 
   return (
-    <ProfileContent
-      session={session}
-      profile={profile}
-      reviews={reviews || []}
-      reviewsLoading={reviewsLoading}
-      reviewsError={reviewsError}
-    />
+    <>
+      {!isMobile && <BurgerMenu />}
+      <ProfileContent
+        session={session}
+        profile={profile}
+        reviews={reviews || []}
+        reviewsLoading={reviewsLoading}
+        reviewsError={reviewsError}
+      />
+      {isMobile && <BottomNav />}
+    </>
   );
 };
 
