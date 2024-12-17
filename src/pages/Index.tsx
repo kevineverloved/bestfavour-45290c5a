@@ -42,7 +42,7 @@ const iconMap: Record<string, React.ComponentType<any>> = {
   settings: Settings,
 };
 
-// Color mapping for service category icons using the specified colors
+// Each icon has a unique color from the specified palette
 const iconColors: Record<string, string> = {
   brush: "#FF0000",    // Red
   flower: "#0000FF",   // Blue
@@ -50,7 +50,7 @@ const iconColors: Record<string, string> = {
   home: "#008000",     // Green
   truck: "#FFA500",    // Orange
   shield: "#800080",   // Purple
-  settings: "#800080", // Purple (fallback)
+  settings: "#4B0082", // Different shade of purple for settings
 };
 
 const promotionalImages = [
@@ -168,7 +168,7 @@ const Index = () => {
                       <IconComponent 
                         className="h-12 w-12 mb-2 group-hover:scale-110 transition-transform" 
                         strokeWidth={1.5}
-                        style={{ color: iconColors[category.icon] || '#800080' }}
+                        style={{ color: iconColors[category.icon] || '#4B0082' }}
                       />
                       <span className="text-center font-medium text-gray-900">
                         {category.name}
