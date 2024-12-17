@@ -60,7 +60,8 @@ const Settings = () => {
   const handleItemClick = (path: string) => {
     if (path === '/settings/personal-information' || 
         path === '/settings/notifications' || 
-        path === '/settings/privacy') {
+        path === '/settings/privacy' ||
+        path === '/settings/payments') {
       navigate(path);
     } else {
       toast({
