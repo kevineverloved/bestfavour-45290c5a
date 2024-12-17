@@ -58,7 +58,9 @@ const Settings = () => {
   const { toast } = useToast();
 
   const handleItemClick = (path: string) => {
-    if (path === '/settings/personal-information' || path === '/settings/notifications') {
+    if (path === '/settings/personal-information' || 
+        path === '/settings/notifications' || 
+        path === '/settings/privacy') {
       navigate(path);
     } else {
       toast({
