@@ -14,9 +14,23 @@ interface Review {
 
 interface ReviewsListProps {
   reviews: Review[];
+  isLoading?: boolean;
 }
 
-export function ReviewsList({ reviews }: ReviewsListProps) {
+export function ReviewsList({ reviews, isLoading }: ReviewsListProps) {
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Reviews from Service Providers</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-muted-foreground">Loading reviews...</div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card>
       <CardHeader>
