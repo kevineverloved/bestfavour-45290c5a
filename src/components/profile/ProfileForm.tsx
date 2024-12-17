@@ -3,19 +3,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Save, X } from "lucide-react";
 
 interface ProfileFormProps {
   initialData: {
     first_name: string | null;
     last_name: string | null;
-    show_personal_info: boolean | null;
   };
   onSubmit: (data: {
     first_name: string;
     last_name: string;
-    show_personal_info: boolean;
   }) => void;
   onCancel: () => void;
 }
@@ -24,7 +21,6 @@ export function ProfileForm({ initialData, onSubmit, onCancel }: ProfileFormProp
   const [formData, setFormData] = useState({
     first_name: initialData.first_name || "",
     last_name: initialData.last_name || "",
-    show_personal_info: initialData.show_personal_info || false,
   });
 
   return (
@@ -63,25 +59,6 @@ export function ProfileForm({ initialData, onSubmit, onCancel }: ProfileFormProp
                 }
               />
             </div>
-          </div>
-
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="show_personal_info"
-              checked={formData.show_personal_info}
-              onCheckedChange={(checked) =>
-                setFormData({
-                  ...formData,
-                  show_personal_info: checked as boolean,
-                })
-              }
-            />
-            <Label
-              htmlFor="show_personal_info"
-              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-            >
-              Display my full name publicly
-            </Label>
           </div>
 
           <div className="flex justify-end gap-3">
