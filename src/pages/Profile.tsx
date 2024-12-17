@@ -1,24 +1,18 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ProfileHeader } from "@/components/profile/ProfileHeader";
+import { ProfileForm } from "@/components/profile/ProfileForm";
+import { ProfileError } from "@/components/profile/ProfileError";
 import { ReviewsList } from "@/components/profile/ReviewsList";
-import { AlertCircle } from "lucide-react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const Profile = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState({
-    full_name: "",
-  });
 
   const { data: session, isLoading: sessionLoading } = useQuery({
     queryKey: ["session"],
@@ -36,26 +30,14 @@ const Profile = () => {
       const { data, error } = await supabase
         .from("profiles")
         .select("*")
-        .eq("id", session.user.id);
+        .eq("id", session.user.id)
+        .limit(1);
 
       if (error) throw error;
       
-      // If no profile exists, create one
-      if (!data || data.length === 0) {
-        const { data: newProfile, error: createError } = await supabase
-          .from("profiles")
-          .insert([{ id: session.user.id }])
-          .select()
-          .single();
-          
-        if (createError) throw createError;
-        return newProfile;
-      }
-      
-      return data[0];
+      return data?.[0];
     },
     enabled: !!session?.user?.id,
-    retry: 1,
   });
 
   const { data: reviews, isLoading: reviewsLoading, error: reviewsError } = useQuery({
@@ -77,17 +59,15 @@ const Profile = () => {
       return data;
     },
     enabled: !!session?.user?.id,
-    retry: 1,
   });
 
   const updateProfile = useMutation({
-    mutationFn: async (data: typeof formData) => {
+    mutationFn: async (data: { full_name: string }) => {
       if (!session?.user?.id) throw new Error("No user ID");
       
       const { error } = await supabase
         .from("profiles")
-        .update(data)
-        .eq("id", session.user.id);
+        .upsert({ id: session.user.id, ...data });
 
       if (error) throw error;
     },
@@ -151,12 +131,7 @@ const Profile = () => {
     if (!sessionLoading && !session) {
       navigate("/auth");
     }
-    if (profile) {
-      setFormData({
-        full_name: profile.full_name || "",
-      });
-    }
-  }, [session, profile, navigate, sessionLoading]);
+  }, [session, navigate, sessionLoading]);
 
   if (sessionLoading || profileLoading) {
     return <div className="container mx-auto py-8">Loading...</div>;
@@ -165,13 +140,7 @@ const Profile = () => {
   if (profileError) {
     return (
       <div className="container mx-auto py-8">
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Error</AlertTitle>
-          <AlertDescription>
-            Failed to load profile. Please try refreshing the page.
-          </AlertDescription>
-        </Alert>
+        <ProfileError message="Failed to load profile. Please try refreshing the page." />
       </div>
     );
   }
@@ -186,51 +155,18 @@ const Profile = () => {
           onAvatarUpload={handleAvatarUpload}
         />
 
-        {isEditing ? (
-          <Card>
-            <CardContent className="p-6">
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  updateProfile.mutate(formData);
-                }}
-                className="space-y-4"
-              >
-                <div>
-                  <Label htmlFor="full_name">Full Name</Label>
-                  <Input
-                    id="full_name"
-                    value={formData.full_name}
-                    onChange={(e) =>
-                      setFormData({ ...formData, full_name: e.target.value })
-                    }
-                  />
-                </div>
-                <div className="flex justify-end space-x-2">
-                  <button
-                    type="button"
-                    className="btn btn-secondary"
-                    onClick={() => setIsEditing(false)}
-                  >
-                    Cancel
-                  </button>
-                  <button type="submit" className="btn btn-primary">
-                    Save
-                  </button>
-                </div>
-              </form>
-            </CardContent>
-          </Card>
-        ) : null}
+        {isEditing && (
+          <ProfileForm
+            initialData={{
+              full_name: profile?.full_name || "",
+            }}
+            onSubmit={(data) => updateProfile.mutate(data)}
+            onCancel={() => setIsEditing(false)}
+          />
+        )}
 
         {reviewsError ? (
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Error</AlertTitle>
-            <AlertDescription>
-              Failed to load reviews. Please try refreshing the page.
-            </AlertDescription>
-          </Alert>
+          <ProfileError message="Failed to load reviews. Please try refreshing the page." />
         ) : (
           <ReviewsList reviews={reviews || []} isLoading={reviewsLoading} />
         )}
