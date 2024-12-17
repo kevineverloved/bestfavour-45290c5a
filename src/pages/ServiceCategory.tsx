@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -6,7 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Star } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { BurgerMenu } from "@/components/BurgerMenu";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { BottomNav } from "@/components/BottomNav";
@@ -16,7 +16,24 @@ const ServiceCategory = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
 
-  const { data: category, isLoading: categoryLoading } = useQuery({
+  // Return early if categoryId is undefined
+  if (!categoryId) {
+    return (
+      <div className="p-8 text-center">
+        <p className="text-red-500">Invalid category ID</p>
+        <Button 
+          variant="ghost" 
+          className="mt-4"
+          onClick={() => navigate('/')}
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back to Home
+        </Button>
+      </div>
+    );
+  }
+
+  const { data: category, isLoading: categoryLoading, error: categoryError } = useQuery({
     queryKey: ['serviceCategory', categoryId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -27,10 +44,11 @@ const ServiceCategory = () => {
       
       if (error) throw error;
       return data;
-    }
+    },
+    enabled: !!categoryId // Only run query if categoryId exists
   });
 
-  const { data: providers, isLoading: providersLoading } = useQuery({
+  const { data: providers, isLoading: providersLoading, error: providersError } = useQuery({
     queryKey: ['serviceProviders', categoryId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -46,14 +64,39 @@ const ServiceCategory = () => {
       
       if (error) throw error;
       return data;
-    }
+    },
+    enabled: !!categoryId // Only run query if categoryId exists
   });
 
+  // Handle loading state
   if (categoryLoading || providersLoading) {
     return (
-      <div className="p-8">
+      <div className="min-h-screen bg-gray-50 p-4 md:p-8">
         {!isMobile && <BurgerMenu />}
-        Loading...
+        <div className="flex items-center justify-center h-64">
+          <p className="text-gray-500">Loading...</p>
+        </div>
+        {isMobile && <BottomNav />}
+      </div>
+    );
+  }
+
+  // Handle errors
+  if (categoryError || providersError) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-4 md:p-8">
+        {!isMobile && <BurgerMenu />}
+        <div className="text-center">
+          <p className="text-red-500">Error loading category information</p>
+          <Button 
+            variant="ghost" 
+            className="mt-4"
+            onClick={() => navigate('/')}
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Home
+          </Button>
+        </div>
         {isMobile && <BottomNav />}
       </div>
     );
