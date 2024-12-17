@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { BurgerMenu } from "@/components/BurgerMenu";
 import { BottomNav } from "@/components/BottomNav";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Home, Tree, SprayCan, Truck, Wrench, Shield } from "lucide-react";
+import { Home, TreePine, Spray, Truck, Wrench, Shield } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 
 interface ServiceCategory {
@@ -18,8 +18,8 @@ interface ServiceCategory {
 
 const iconMap = {
   home: Home,
-  tree: Tree,
-  "spray-can": SprayCan,
+  tree: TreePine,
+  "spray-can": Spray,
   truck: Truck,
   wrench: Wrench,
   shield: Shield,
