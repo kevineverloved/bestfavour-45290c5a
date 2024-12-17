@@ -8,28 +8,34 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { createClient } from '@supabase/supabase-js';
 import { useToast } from "@/hooks/use-toast";
+import ServiceTypeSelection from "@/components/auth/ServiceTypeSelection";
+import ProviderForm from "@/components/auth/ProviderForm";
 
-// Create a single supabase client for interacting with your database
 const supabase = createClient(
-  'https://xyzcompany.supabase.co',  // Replace with your Supabase project URL
-  'public-anon-key'  // Replace with your public anon key
+  'https://xyzcompany.supabase.co',
+  'public-anon-key'
 );
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [fullName, setFullName] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [role, setRole] = useState("user");
-  const [bio, setBio] = useState("");
+  const [userType, setUserType] = useState("seeker");
   const [isLoading, setIsLoading] = useState(false);
+  const [providerData, setProviderData] = useState({
+    businessName: "",
+    serviceType: "maintenance",
+    experience: "",
+    availability: "",
+    location: "",
+    rates: "",
+    insurance: "",
+  });
+  
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -62,16 +68,28 @@ const Auth = () => {
       return false;
     }
 
-    if (!isLogin && !fullName) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Please enter your full name",
-      });
-      return false;
+    if (!isLogin && userType === "provider") {
+      const requiredFields = ["businessName", "experience", "availability", "location", "rates", "insurance"];
+      const missingFields = requiredFields.filter(field => !providerData[field]);
+      
+      if (missingFields.length > 0) {
+        toast({
+          variant: "destructive",
+          title: "Missing Information",
+          description: "Please fill in all required provider information",
+        });
+        return false;
+      }
     }
 
     return true;
+  };
+
+  const handleProviderDataChange = (key: string, value: string) => {
+    setProviderData(prev => ({
+      ...prev,
+      [key]: value
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -100,10 +118,8 @@ const Auth = () => {
           password,
           options: {
             data: {
-              full_name: fullName,
-              phone_number: phoneNumber,
-              role: role,
-              bio: bio,
+              user_type: userType,
+              ...(userType === "provider" ? providerData : {}),
             }
           }
         });
@@ -167,56 +183,19 @@ const Auth = () => {
 
             {!isLogin && (
               <>
-                <div className="space-y-2">
-                  <Label htmlFor="fullName">Full Name</Label>
-                  <Input
-                    id="fullName"
-                    type="text"
-                    placeholder="John Doe"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    required
-                    disabled={isLoading}
+                <ServiceTypeSelection
+                  userType={userType}
+                  setUserType={setUserType}
+                  isLoading={isLoading}
+                />
+                
+                {userType === "provider" && (
+                  <ProviderForm
+                    formData={providerData}
+                    setFormData={handleProviderDataChange}
+                    isLoading={isLoading}
                   />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="phoneNumber">Phone Number</Label>
-                  <Input
-                    id="phoneNumber"
-                    type="tel"
-                    placeholder="+1 (555) 000-0000"
-                    value={phoneNumber}
-                    onChange={(e) => setPhoneNumber(e.target.value)}
-                    disabled={isLoading}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>I am a...</Label>
-                  <RadioGroup value={role} onValueChange={setRole} className="flex flex-col space-y-1">
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="user" id="user" />
-                      <Label htmlFor="user">Regular User</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="creator" id="creator" />
-                      <Label htmlFor="creator">Content Creator</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="business" id="business" />
-                      <Label htmlFor="business">Business Owner</Label>
-                    </div>
-                  </RadioGroup>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="bio">Bio</Label>
-                  <Textarea
-                    id="bio"
-                    placeholder="Tell us a bit about yourself..."
-                    value={bio}
-                    onChange={(e) => setBio(e.target.value)}
-                    disabled={isLoading}
-                  />
-                </div>
+                )}
               </>
             )}
 
