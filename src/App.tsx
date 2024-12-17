@@ -11,6 +11,7 @@ import BookingPage from "./pages/BookingPage";
 import BookingsPage from "./pages/BookingsPage";
 import Profile from "./pages/Profile";
 import Location from "./pages/Location";
+import Settings from "./pages/Settings";
 
 const App = () => {
   const [queryClient] = useState(() => new QueryClient({
@@ -36,6 +37,7 @@ const App = () => {
             <Route path="/bookings" element={<BookingsPage />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/location" element={<Location />} />
+            <Route path="/settings" element={<Settings />} />
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
