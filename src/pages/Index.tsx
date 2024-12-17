@@ -6,7 +6,19 @@ import { supabase } from "@/integrations/supabase/client";
 import { BurgerMenu } from "@/components/BurgerMenu";
 import { BottomNav } from "@/components/BottomNav";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Briefcase, Home, Car, Heart, ShoppingCart, Settings } from "lucide-react";
+import { 
+  Car,
+  Home,
+  Tools,
+  Heart,
+  Leaf,
+  Book,
+  Computer,
+  Camera,
+  Utensils,
+  Shirt,
+  Settings
+} from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -18,11 +30,16 @@ interface ServiceCategory {
 }
 
 const iconMap: Record<string, React.ComponentType<any>> = {
-  briefcase: Briefcase,
-  home: Home,
   car: Car,
+  house: Home,
+  tools: Tools,
   heart: Heart,
-  "shopping-cart": ShoppingCart,
+  leaf: Leaf,
+  book: Book,
+  computer: Computer,
+  camera: Camera,
+  food: Utensils,
+  tshirt: Shirt,
   settings: Settings,
 };
 
@@ -105,7 +122,10 @@ const Index = () => {
                 >
                   <Card className="h-32 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
                     <CardContent className="h-full flex flex-col items-center justify-center p-4">
-                      <IconComponent className="h-12 w-12 mb-2 text-primary group-hover:scale-110 transition-transform" />
+                      <IconComponent 
+                        className="h-12 w-12 mb-2 text-primary group-hover:scale-110 transition-transform" 
+                        strokeWidth={1.5}
+                      />
                       <span className="text-center font-medium text-gray-900">
                         {category.name}
                       </span>
