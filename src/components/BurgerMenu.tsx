@@ -36,7 +36,11 @@ export const BurgerMenu = () => {
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="fixed top-4 right-4 md:hidden">
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="fixed top-4 right-4 md:hidden z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
+        >
           <Menu className="h-6 w-6" />
         </Button>
       </SheetTrigger>
