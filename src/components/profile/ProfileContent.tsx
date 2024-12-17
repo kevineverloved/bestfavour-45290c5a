@@ -180,7 +180,11 @@ export function ProfileContent({
         {reviewsError ? (
           <ProfileError message="Failed to load reviews. Please try refreshing the page." />
         ) : (
-          <ReviewsList reviews={reviews || []} isLoading={reviewsLoading} />
+          <ReviewsList 
+            reviews={reviews || []} 
+            isLoading={reviewsLoading} 
+            showReviews={profile?.show_personal_info}
+          />
         )}
       </div>
     </div>

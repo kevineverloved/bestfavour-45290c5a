@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Shield, Eye, UserCircle2 } from "lucide-react";
@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator";
 const PrivacySettings = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const { data: session } = useQuery({
     queryKey: ["session"],
@@ -36,28 +37,35 @@ const PrivacySettings = () => {
     enabled: !!session?.user?.id,
   });
 
-  const handleToggleChange = async (field: string, value: boolean) => {
-    if (!session?.user?.id) return;
+  const updatePrivacySettings = useMutation({
+    mutationFn: async (value: boolean) => {
+      if (!session?.user?.id) throw new Error("No user ID");
 
-    try {
       const { error } = await supabase
         .from("profiles")
-        .update({ [field]: value })
+        .update({ show_personal_info: value })
         .eq("id", session.user.id);
 
       if (error) throw error;
-
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["profile"] });
       toast({
         title: "Settings updated",
         description: "Your privacy settings have been updated successfully.",
       });
-    } catch (error) {
+    },
+    onError: () => {
       toast({
         variant: "destructive",
         title: "Error",
         description: "Failed to update privacy settings. Please try again.",
       });
-    }
+    },
+  });
+
+  const handleToggleChange = async (value: boolean) => {
+    updatePrivacySettings.mutate(value);
   };
 
   if (!session) {
@@ -96,16 +104,14 @@ const PrivacySettings = () => {
                 <div className="flex-1 space-y-1">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h3 className="font-medium">Show Personal Information</h3>
+                      <h3 className="font-medium">Show Reviews</h3>
                       <p className="text-sm text-muted-foreground">
-                        Allow others to see your personal information like full name and bio
+                        Allow everyone excluding Service providers to see your reviews
                       </p>
                     </div>
                     <Switch
                       checked={profile?.show_personal_info || false}
-                      onCheckedChange={(checked) => 
-                        handleToggleChange("show_personal_info", checked)
-                      }
+                      onCheckedChange={handleToggleChange}
                     />
                   </div>
                 </div>

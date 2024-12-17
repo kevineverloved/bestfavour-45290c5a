@@ -15,9 +15,10 @@ interface Review {
 interface ReviewsListProps {
   reviews: Review[];
   isLoading?: boolean;
+  showReviews?: boolean;
 }
 
-export function ReviewsList({ reviews, isLoading }: ReviewsListProps) {
+export function ReviewsList({ reviews, isLoading, showReviews = true }: ReviewsListProps) {
   if (isLoading) {
     return (
       <Card>
@@ -26,6 +27,21 @@ export function ReviewsList({ reviews, isLoading }: ReviewsListProps) {
         </CardHeader>
         <CardContent>
           <div className="text-muted-foreground animate-pulse">Loading reviews...</div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (!showReviews) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Reviews from Service Providers</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground text-center py-8">
+            Reviews are hidden due to privacy settings
+          </p>
         </CardContent>
       </Card>
     );
