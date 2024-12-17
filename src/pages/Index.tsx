@@ -44,7 +44,7 @@ const iconMap: Record<string, React.ComponentType<any>> = {
 
 // Each icon has a unique color from the specified palette
 const iconColors: Record<string, string> = {
-  brush: "#FF0000",    // Red
+  brush: "#0EA5E9",    // Ocean Blue for cleaning
   flower: "#0000FF",   // Blue
   wrench: "#FFD700",   // Yellow
   home: "#008000",     // Green
