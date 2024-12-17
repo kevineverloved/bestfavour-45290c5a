@@ -18,41 +18,39 @@ serve(async (req) => {
       throw new Error('Missing Yoco secret key')
     }
 
-    if (verifyOnly) {
-      // For card verification, we'll use Yoco's verify endpoint
-      const response = await fetch('https://online.yoco.com/v1/cards/verify', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${YOCO_SECRET_KEY}`
-        },
-        body: JSON.stringify({
-          token,
-          currency: 'ZAR',
-          verify_card: true
-        })
+    console.log('Verifying card token:', token);
+
+    // Use Yoco's verify endpoint
+    const response = await fetch('https://online.yoco.com/v1/tokens/verify', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${YOCO_SECRET_KEY}`
+      },
+      body: JSON.stringify({
+        token,
       })
+    });
 
-      const result = await response.json()
+    const result = await response.json();
+    console.log('Yoco API response:', result);
 
-      if (!response.ok) {
-        throw new Error(result.message || 'Failed to verify card')
-      }
-
-      return new Response(
-        JSON.stringify({ success: true, message: 'Card verified successfully' }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
+    if (!response.ok) {
+      throw new Error(result.message || 'Failed to verify card');
     }
 
-    throw new Error('Invalid operation')
+    return new Response(
+      JSON.stringify({ success: true, message: 'Card verified successfully' }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
   } catch (error) {
+    console.error('Error in create-payment function:', error);
     return new Response(
       JSON.stringify({ error: error.message }),
       { 
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       }
-    )
+    );
   }
 })

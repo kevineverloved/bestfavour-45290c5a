@@ -38,7 +38,6 @@ const PaymentMethods = () => {
             return;
           }
 
-          // Token created successfully
           try {
             const { data, error } = await supabase.functions.invoke('create-payment', {
               body: {
@@ -51,22 +50,24 @@ const PaymentMethods = () => {
 
             toast({
               title: "Success",
-              description: "Payment method added successfully",
+              description: "Card added successfully",
             });
 
           } catch (error: any) {
+            console.error('Payment verification error:', error);
             toast({
               title: "Error",
-              description: error.message,
+              description: error.message || "Failed to verify card. Please try again.",
               variant: "destructive",
             });
           }
         }
       });
     } catch (error: any) {
+      console.error('Card addition error:', error);
       toast({
         title: "Error",
-        description: error.message,
+        description: error.message || "Failed to add card. Please try again.",
         variant: "destructive",
       });
     } finally {
