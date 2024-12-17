@@ -7,7 +7,6 @@ import { ProfileHeader } from "@/components/profile/ProfileHeader";
 import { ProfileForm } from "@/components/profile/ProfileForm";
 import { ProfileError } from "@/components/profile/ProfileError";
 import { ReviewsList } from "@/components/profile/ReviewsList";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2 } from "lucide-react";
 
 const Profile = () => {
@@ -42,10 +41,27 @@ const Profile = () => {
     enabled: !!session?.user?.id,
   });
 
-  const { data: reviews, isLoading: reviewsLoading, error: reviewsError } = useQuery({
-    queryKey: ["reviews", session?.user?.id],
+  const { data: serviceProvider } = useQuery({
+    queryKey: ["serviceProvider", session?.user?.id],
     queryFn: async () => {
       if (!session?.user?.id) throw new Error("No user ID");
+      
+      const { data, error } = await supabase
+        .from("service_providers")
+        .select("*")
+        .eq("user_id", session.user.id)
+        .limit(1);
+
+      if (error) throw error;
+      return data?.[0];
+    },
+    enabled: !!session?.user?.id,
+  });
+
+  const { data: reviews, isLoading: reviewsLoading, error: reviewsError } = useQuery({
+    queryKey: ["reviews", serviceProvider?.id],
+    queryFn: async () => {
+      if (!serviceProvider?.id) throw new Error("No provider ID");
       
       const { data, error } = await supabase
         .from("reviews")
@@ -55,12 +71,12 @@ const Profile = () => {
             business_name
           )
         `)
-        .eq("user_id", session.user.id);
+        .eq("provider_id", serviceProvider.id);
 
       if (error) throw error;
       return data;
     },
-    enabled: !!session?.user?.id,
+    enabled: !!serviceProvider?.id,
   });
 
   const updateProfile = useMutation({
@@ -99,44 +115,6 @@ const Profile = () => {
     },
   });
 
-  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file || !session?.user?.id) return;
-
-    try {
-      const fileExt = file.name.split(".").pop();
-      const filePath = `${session.user.id}/avatar.${fileExt}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from("avatars")
-        .upload(filePath, file, { upsert: true });
-
-      if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from("avatars")
-        .getPublicUrl(filePath);
-
-      await supabase
-        .from("profiles")
-        .update({ avatar_url: publicUrl })
-        .eq("id", session.user.id);
-
-      queryClient.invalidateQueries({ queryKey: ["profile"] });
-      toast({
-        title: "Avatar updated",
-        description: "Your avatar has been updated successfully.",
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to upload avatar. Please try again.",
-        variant: "destructive",
-      });
-      console.error("Error uploading avatar:", error);
-    }
-  };
-
   useEffect(() => {
     if (!sessionLoading && !session) {
       navigate("/auth");
@@ -171,46 +149,30 @@ const Profile = () => {
           onAvatarUpload={handleAvatarUpload}
         />
 
-        <Tabs defaultValue="profile" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="profile">Profile Details</TabsTrigger>
-            <TabsTrigger value="reviews">Reviews</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="profile" className="mt-6">
-            {isEditing ? (
-              <ProfileForm
-                initialData={{
-                  first_name: profile?.first_name || "",
-                  last_name: profile?.last_name || "",
-                  show_personal_info: profile?.show_personal_info || false,
-                }}
-                onSubmit={(data) => updateProfile.mutate(data)}
-                onCancel={() => setIsEditing(false)}
-              />
-            ) : (
-              <div className="bg-card rounded-lg shadow-sm p-6">
-                <h3 className="text-lg font-semibold mb-4">About Me</h3>
-                <p className="text-muted-foreground">
-                  {profile?.first_name
-                    ? `Hi, I'm ${profile.first_name}!`
-                    : "No profile information available yet. Click 'Edit Profile' to add your details."}
-                </p>
-              </div>
-            )}
-          </TabsContent>
-          
-          <TabsContent value="reviews" className="mt-6">
+        {isEditing && (
+          <ProfileForm
+            initialData={{
+              first_name: profile?.first_name || "",
+              last_name: profile?.last_name || "",
+              show_personal_info: profile?.show_personal_info || false,
+            }}
+            onSubmit={(data) => updateProfile.mutate(data)}
+            onCancel={() => setIsEditing(false)}
+          />
+        )}
+
+        {serviceProvider && (
+          <div className="mt-8">
             {reviewsError ? (
               <ProfileError message="Failed to load reviews. Please try refreshing the page." />
             ) : (
               <ReviewsList reviews={reviews || []} isLoading={reviewsLoading} />
             )}
-          </TabsContent>
-        </Tabs>
+          </div>
+        )}
       </div>
     </div>
   );
-}
+};
 
 export default Profile;
