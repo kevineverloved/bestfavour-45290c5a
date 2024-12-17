@@ -69,24 +69,15 @@ export function ProfileContent({
     if (!file || !session?.user?.id) return;
 
     try {
-      // Create avatars bucket if it doesn't exist
-      const { data: buckets } = await supabase.storage.listBuckets();
-      if (!buckets?.find(bucket => bucket.name === 'avatars')) {
-        await supabase.storage.createBucket('avatars', {
-          public: true,
-          fileSizeLimit: 1024 * 1024, // 1MB
-          allowedMimeTypes: ['image/png', 'image/jpeg', 'image/gif']
-        });
-      }
-
-      // Upload the file
+      // Upload the file with user ID in the path
       const fileExt = file.name.split('.').pop();
-      const filePath = `${session.user.id}.${fileExt}`;
+      const filePath = `${session.user.id}/${crypto.randomUUID()}.${fileExt}`;
 
-      const { error: uploadError } = await supabase.storage
+      const { error: uploadError, data } = await supabase.storage
         .from('avatars')
         .upload(filePath, file, {
           upsert: true,
+          contentType: file.type,
         });
 
       if (uploadError) throw uploadError;
@@ -111,11 +102,11 @@ export function ProfileContent({
         title: "Avatar updated",
         description: "Your profile picture has been updated successfully.",
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error uploading avatar:', error);
       toast({
         title: "Error",
-        description: "Failed to upload avatar. Please try again.",
+        description: error.message || "Failed to upload avatar. Please try again.",
         variant: "destructive",
       });
     }
