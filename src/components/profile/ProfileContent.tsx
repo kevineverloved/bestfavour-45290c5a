@@ -7,6 +7,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Settings } from "lucide-react";
 
 interface ProfileContentProps {
   session: Session;
@@ -120,7 +122,15 @@ export function ProfileContent({
   };
 
   return (
-    <div className="container mx-auto py-8 px-4 md:px-8 max-w-4xl">
+    <div className="container mx-auto py-8 px-4 md:px-8 max-w-4xl relative">
+      <Button 
+        variant="ghost" 
+        size="icon" 
+        className="fixed top-4 left-4 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
+      >
+        <Settings className="h-6 w-6" />
+      </Button>
+
       <div className="space-y-8">
         <ProfileHeader
           avatarUrl={profile?.avatar_url}
