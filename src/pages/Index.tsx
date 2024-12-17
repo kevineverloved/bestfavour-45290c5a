@@ -7,16 +7,13 @@ import { BurgerMenu } from "@/components/BurgerMenu";
 import { BottomNav } from "@/components/BottomNav";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { 
-  Car,
-  Home,
   Wrench,
-  Heart,
-  Leaf,
-  Book,
-  Computer,
-  Camera,
-  Utensils,
-  Shirt,
+  Scissors,
+  Laptop,
+  Car,
+  UtensilsCrossed,
+  Briefcase,
+  Home,
   Settings
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
@@ -33,13 +30,10 @@ const iconMap: Record<string, React.ComponentType<any>> = {
   car: Car,
   house: Home,
   tools: Wrench,
-  heart: Heart,
-  leaf: Leaf,
-  book: Book,
-  computer: Computer,
-  camera: Camera,
-  food: Utensils,
-  tshirt: Shirt,
+  scissors: Scissors,
+  laptop: Laptop,
+  food: UtensilsCrossed,
+  briefcase: Briefcase,
   settings: Settings,
 };
 
@@ -75,7 +69,7 @@ const Index = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-  return (
+return (
     <div className="min-h-screen bg-gray-50 pb-16 md:pb-0">
       {!isMobile && <BurgerMenu />}
       
