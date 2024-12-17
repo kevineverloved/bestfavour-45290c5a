@@ -8,17 +8,17 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import ServiceCategory from "./pages/ServiceCategory";
 import BookingPage from "./pages/BookingPage";
-import BookingsPage from "./pages/BookingsPage";
 import Profile from "./pages/Profile";
+import BookingsPage from "./pages/BookingsPage";
 import Location from "./pages/Location";
 import Settings from "./pages/Settings";
+import PersonalInformation from "./pages/PersonalInformation";
 
 const App: React.FC = () => {
   const [queryClient] = useState(() => new QueryClient({
     defaultOptions: {
       queries: {
-        staleTime: 60 * 1000, // 1 minute
-        retry: 1,
+        staleTime: 1000 * 60 * 5, // 5 minutes
       },
     },
   }));
@@ -26,19 +26,20 @@ const App: React.FC = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <Toaster />
-        <Sonner />
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
-            <Route path="/services/:categoryId" element={<ServiceCategory />} />
-            <Route path="/book/:providerId" element={<BookingPage />} />
-            <Route path="/bookings" element={<BookingsPage />} />
+            <Route path="/category/:id" element={<ServiceCategory />} />
+            <Route path="/booking/:id" element={<BookingPage />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/bookings" element={<BookingsPage />} />
             <Route path="/location" element={<Location />} />
             <Route path="/settings" element={<Settings />} />
+            <Route path="/settings/personal-information" element={<PersonalInformation />} />
           </Routes>
+          <Toaster />
+          <Sonner />
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>

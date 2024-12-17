@@ -1,6 +1,5 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { 
   UserCircle2, 
   Bell, 
@@ -19,7 +18,7 @@ const settingsItems = [
   { 
     title: 'Personal Information', 
     icon: UserCircle2, 
-    path: '/profile',
+    path: '/settings/personal-information',
     description: 'Manage your personal details and profile' 
   },
   { 
@@ -58,16 +57,8 @@ const Settings = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const { data: session } = useQuery({
-    queryKey: ["session"],
-    queryFn: async () => {
-      const { data } = await supabase.auth.getSession();
-      return data.session;
-    },
-  });
-
   const handleItemClick = (path: string) => {
-    if (path === '/profile') {
+    if (path === '/settings/personal-information') {
       navigate(path);
     } else {
       toast({
@@ -76,11 +67,6 @@ const Settings = () => {
       });
     }
   };
-
-  if (!session) {
-    navigate("/auth");
-    return null;
-  }
 
   return (
     <div className="min-h-screen bg-background">
