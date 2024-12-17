@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Settings } from "lucide-react";
+import { AvatarCropDialog } from "./AvatarCropDialog";
 
 interface ProfileContentProps {
   session: Session;
@@ -26,6 +27,8 @@ export function ProfileContent({
   reviewsError,
 }: ProfileContentProps) {
   const [isEditing, setIsEditing] = useState(false);
+  const [cropDialogOpen, setCropDialogOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -66,18 +69,27 @@ export function ProfileContent({
 
   const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (!file || !session?.user?.id) return;
+    if (!file) return;
+
+    // Create a temporary URL for the selected image
+    const imageUrl = URL.createObjectURL(file);
+    setSelectedImage(imageUrl);
+    setCropDialogOpen(true);
+  };
+
+  const handleCroppedImage = async (croppedBlob: Blob) => {
+    if (!session?.user?.id) return;
 
     try {
-      // Upload the file with user ID in the path
-      const fileExt = file.name.split('.').pop();
+      // Create a new file from the cropped blob
+      const fileExt = 'jpg';
       const filePath = `${session.user.id}/${crypto.randomUUID()}.${fileExt}`;
 
       const { error: uploadError, data } = await supabase.storage
         .from('avatars')
-        .upload(filePath, file, {
+        .upload(filePath, croppedBlob, {
           upsert: true,
-          contentType: file.type,
+          contentType: 'image/jpeg',
         });
 
       if (uploadError) throw uploadError;
@@ -109,6 +121,12 @@ export function ProfileContent({
         description: error.message || "Failed to upload avatar. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setCropDialogOpen(false);
+      if (selectedImage) {
+        URL.revokeObjectURL(selectedImage);
+        setSelectedImage(null);
+      }
     }
   };
 
@@ -131,6 +149,18 @@ export function ProfileContent({
           onEditClick={() => setIsEditing(true)}
           onAvatarUpload={handleAvatarUpload}
         />
+
+        {selectedImage && (
+          <AvatarCropDialog
+            imageUrl={selectedImage}
+            isOpen={cropDialogOpen}
+            onClose={() => {
+              setCropDialogOpen(false);
+              setSelectedImage(null);
+            }}
+            onCropComplete={handleCroppedImage}
+          />
+        )}
 
         {isEditing && (
           <ProfileForm
