@@ -16,6 +16,7 @@ import PersonalInformation from "./pages/PersonalInformation";
 import NotificationsSettings from "./pages/NotificationsSettings";
 import PrivacySettings from "./pages/PrivacySettings";
 import PaymentMethods from "./pages/PaymentMethods";
+import HelpSupport from "./pages/HelpSupport";
 
 const App: React.FC = () => {
   const [queryClient] = useState(() => new QueryClient({
@@ -43,6 +44,7 @@ const App: React.FC = () => {
             <Route path="/settings/notifications" element={<NotificationsSettings />} />
             <Route path="/settings/privacy" element={<PrivacySettings />} />
             <Route path="/settings/payments" element={<PaymentMethods />} />
+            <Route path="/settings/help" element={<HelpSupport />} />
           </Routes>
           <Toaster />
           <Sonner />

@@ -5,7 +5,6 @@ import {
   Bell, 
   Lock, 
   CreditCard, 
-  Globe, 
   HelpCircle,
   ChevronRight,
   ArrowLeft
@@ -40,12 +39,6 @@ const settingsItems = [
     description: 'Manage your payment methods' 
   },
   { 
-    title: 'Language & Region', 
-    icon: Globe, 
-    path: '/settings/language',
-    description: 'Set your preferred language and region' 
-  },
-  { 
     title: 'Help & Support', 
     icon: HelpCircle, 
     path: '/settings/help',
@@ -61,7 +54,8 @@ const Settings = () => {
     if (path === '/settings/personal-information' || 
         path === '/settings/notifications' || 
         path === '/settings/privacy' ||
-        path === '/settings/payments') {
+        path === '/settings/payments' ||
+        path === '/settings/help') {
       navigate(path);
     } else {
       toast({
