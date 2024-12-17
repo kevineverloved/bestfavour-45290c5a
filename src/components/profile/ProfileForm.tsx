@@ -4,6 +4,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Save, X, ChevronDown } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Select,
   SelectContent,
@@ -11,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { PhoneVerification } from "./PhoneVerification";
 
 interface ProfileFormProps {
   initialData: {
@@ -42,25 +45,96 @@ export function ProfileForm({ initialData, onSubmit, onCancel }: ProfileFormProp
     email: initialData.email || "",
     phone: initialData.phone || "",
   });
-
   const [countryCode, setCountryCode] = useState("+27");
+  const [showVerification, setShowVerification] = useState(false);
+  const [verificationError, setVerificationError] = useState<string>();
+  const [isVerifying, setIsVerifying] = useState(false);
+  const { toast } = useToast();
 
   const handlePhoneChange = (value: string) => {
-    // Remove any non-digit characters except plus sign
     const cleanedValue = value.replace(/[^\d+]/g, "");
     setFormData({ ...formData, phone: cleanedValue });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const phoneWithCode = formData.phone.startsWith("+") 
       ? formData.phone 
       : `${countryCode}${formData.phone}`;
-    onSubmit({
-      ...formData,
-      phone: phoneWithCode,
-    });
+
+    try {
+      const { error } = await supabase.auth.signInWithOtp({
+        phone: phoneWithCode,
+      });
+
+      if (error) throw error;
+
+      setShowVerification(true);
+      toast({
+        title: "Verification code sent",
+        description: "Please check your phone for the verification code.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to send verification code",
+        variant: "destructive",
+      });
+    }
   };
+
+  const handleVerifyCode = async (code: string) => {
+    setIsVerifying(true);
+    setVerificationError(undefined);
+
+    try {
+      const phoneWithCode = formData.phone.startsWith("+") 
+        ? formData.phone 
+        : `${countryCode}${formData.phone}`;
+
+      const { error } = await supabase.auth.verifyOtp({
+        phone: phoneWithCode,
+        token: code,
+        type: 'sms',
+      });
+
+      if (error) throw error;
+
+      // If verification is successful, submit the form data
+      onSubmit({
+        ...formData,
+        phone: phoneWithCode,
+      });
+
+      toast({
+        title: "Phone number verified",
+        description: "Your phone number has been verified successfully.",
+      });
+      setShowVerification(false);
+    } catch (error: any) {
+      setVerificationError(error.message || "Invalid verification code");
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
+  if (showVerification) {
+    return (
+      <Card>
+        <CardContent className="pt-6">
+          <PhoneVerification
+            phoneNumber={formData.phone.startsWith("+") 
+              ? formData.phone 
+              : `${countryCode}${formData.phone}`}
+            onVerify={handleVerifyCode}
+            onCancel={() => setShowVerification(false)}
+            error={verificationError}
+            isLoading={isVerifying}
+          />
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>
