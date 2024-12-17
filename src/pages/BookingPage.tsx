@@ -10,13 +10,23 @@ import { PaymentSummary } from "@/components/booking/PaymentSummary";
 import { useState } from "react";
 
 const BookingPage = () => {
-  const { providerId } = useParams();
+  const { providerId } = useParams<{ providerId: string }>();
   const navigate = useNavigate();
   const [duration, setDuration] = useState(2);
 
   const { data: provider, isLoading } = useQuery({
     queryKey: ['serviceProvider', providerId],
     queryFn: async () => {
+      if (!providerId) {
+        throw new Error('Provider ID is required');
+      }
+
+      // Validate UUID format using regex
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      if (!uuidRegex.test(providerId)) {
+        throw new Error('Invalid provider ID format');
+      }
+
       const { data, error } = await supabase
         .from('service_providers')
         .select(`
@@ -31,7 +41,14 @@ const BookingPage = () => {
         .single();
       
       if (error) throw error;
+      if (!data) throw new Error('Provider not found');
+      
       return data;
+    },
+    retry: false,
+    onError: (error) => {
+      toast.error(error instanceof Error ? error.message : 'Failed to load provider details');
+      navigate('/');
     }
   });
 
