@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
@@ -28,8 +29,50 @@ const iconMap: Record<string, React.ComponentType<any>> = {
   briefcase: Briefcase,
 };
 
-// Use a consistent blue color for all icons as shown in the image
-const ICON_COLOR = "#0066FF";
+// Custom colors and styles for each category
+const categoryStyles: Record<string, {
+  color: string;
+  bgColor: string;
+  hoverEffect: string;
+  strokeWidth: number;
+}> = {
+  wrench: {
+    color: "#4338CA", // Indigo
+    bgColor: "bg-indigo-50",
+    hoverEffect: "hover:rotate-45",
+    strokeWidth: 1.5,
+  },
+  scissors: {
+    color: "#DC2626", // Red
+    bgColor: "bg-red-50",
+    hoverEffect: "hover:scale-110",
+    strokeWidth: 1.2,
+  },
+  laptop: {
+    color: "#2563EB", // Blue
+    bgColor: "bg-blue-50",
+    hoverEffect: "hover:translate-y-[-4px]",
+    strokeWidth: 1.3,
+  },
+  car: {
+    color: "#059669", // Green
+    bgColor: "bg-emerald-50",
+    hoverEffect: "hover:scale-x-110",
+    strokeWidth: 1.4,
+  },
+  utensils: {
+    color: "#9333EA", // Purple
+    bgColor: "bg-purple-50",
+    hoverEffect: "hover:rotate-12",
+    strokeWidth: 1.6,
+  },
+  briefcase: {
+    color: "#D97706", // Amber
+    bgColor: "bg-amber-50",
+    hoverEffect: "hover:scale-105",
+    strokeWidth: 1.5,
+  },
+};
 
 export const ServiceCategoriesGrid = () => {
   const { data: categories, isLoading } = useQuery({
@@ -61,20 +104,23 @@ export const ServiceCategoriesGrid = () => {
         ) : (
           categories?.map((category) => {
             const IconComponent = iconMap[category.icon] || Wrench;
+            const style = categoryStyles[category.icon] || categoryStyles.wrench;
             return (
               <Link 
                 key={category.id} 
                 to={`/category/${category.id}`}
                 className="block group"
               >
-                <Card className="h-32 transition-all duration-300 hover:shadow-lg bg-white">
+                <Card className={`h-32 transition-all duration-300 hover:shadow-xl ${style.bgColor} hover:bg-white`}>
                   <CardContent className="h-full flex flex-col items-center justify-center p-4">
-                    <IconComponent 
-                      className="h-12 w-12 mb-3"
-                      strokeWidth={1.5}
-                      color={ICON_COLOR}
-                    />
-                    <span className="text-center font-medium text-gray-900 text-lg">
+                    <div className={`rounded-full p-3 transition-all duration-300 ${style.hoverEffect} group-hover:shadow-lg`}>
+                      <IconComponent 
+                        className={`h-12 w-12 transition-all duration-300`}
+                        strokeWidth={style.strokeWidth}
+                        style={{ color: style.color }}
+                      />
+                    </div>
+                    <span className="text-center font-medium text-gray-900 text-lg mt-2">
                       {category.name}
                     </span>
                   </CardContent>
