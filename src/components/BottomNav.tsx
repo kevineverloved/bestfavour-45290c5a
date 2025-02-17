@@ -1,4 +1,5 @@
-import { User, Bookmark, Home } from "lucide-react";
+
+import { Home, Search, Star, MapPin, User } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -27,25 +28,43 @@ export const BottomNav = () => {
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 py-2 px-4 flex justify-around items-center">
-      <Link to="/">
-        <Button variant="ghost" size="icon" className="flex flex-col items-center gap-1">
-          <Home className="h-5 w-5" />
-          <span className="text-xs">Home</span>
-        </Button>
-      </Link>
-      <Link to="/bookings">
-        <Button variant="ghost" size="icon" className="flex flex-col items-center gap-1">
-          <Bookmark className="h-5 w-5" />
-          <span className="text-xs">Bookings</span>
-        </Button>
-      </Link>
-      <Link to="/profile">
-        <Button variant="ghost" size="icon" className="flex flex-col items-center gap-1">
-          <User className="h-5 w-5" />
-          <span className="text-xs">Profile</span>
-        </Button>
-      </Link>
+    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 py-2 px-4">
+      <div className="flex justify-between items-center max-w-md mx-auto">
+        <Link to="/">
+          <Button variant="ghost" size="icon" className="flex flex-col items-center gap-1">
+            <Home className="h-5 w-5" />
+            <span className="text-xs">Home</span>
+          </Button>
+        </Link>
+        
+        <Link to="/search">
+          <Button variant="ghost" size="icon" className="flex flex-col items-center gap-1">
+            <Search className="h-5 w-5" />
+            <span className="text-xs">Search</span>
+          </Button>
+        </Link>
+        
+        <Link to="/bookings">
+          <Button variant="ghost" size="icon" className="flex flex-col items-center gap-1">
+            <Star className="h-5 w-5" />
+            <span className="text-xs">Bookings</span>
+          </Button>
+        </Link>
+        
+        <Link to="/location">
+          <Button variant="ghost" size="icon" className="flex flex-col items-center gap-1">
+            <MapPin className="h-5 w-5" />
+            <span className="text-xs">Location</span>
+          </Button>
+        </Link>
+        
+        <Link to="/profile">
+          <Button variant="ghost" size="icon" className="flex flex-col items-center gap-1">
+            <User className="h-5 w-5" />
+            <span className="text-xs">Profile</span>
+          </Button>
+        </Link>
+      </div>
     </div>
   );
 };

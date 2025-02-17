@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { BottomNav } from "@/components/BottomNav";
@@ -35,7 +36,7 @@ const Index = () => {
         <ServiceCategoriesGrid />
       </div>
       
-      {isAuthenticated && isMobile && <BottomNav />}
+      {isMobile && <BottomNav />}
     </div>
   );
 };
