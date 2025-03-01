@@ -1,93 +1,146 @@
-import { Menu, User, Bookmark, Search, FileText } from "lucide-react";
+
 import {
   Sheet,
   SheetContent,
+  SheetDescription,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
+import { Menu } from "lucide-react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
 
-export const BurgerMenu = () => {
-  const { toast } = useToast();
+export function BurgerMenu() {
+  const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
 
-  const handleSignOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      toast({
-        variant: "destructive",
-        title: "Error signing out",
-        description: "Please try again",
-      });
-      return;
-    }
-    toast({
-      title: "Signed out successfully",
-      description: "See you soon!",
-    });
-    navigate("/");
+  const { data: session } = useQuery({
+    queryKey: ["session"],
+    queryFn: async () => {
+      const { data } = await supabase.auth.getSession();
+      return data.session;
+    },
+  });
+
+  const { data: profile } = useQuery({
+    queryKey: ["profile", session?.user?.id],
+    queryFn: async () => {
+      if (!session?.user?.id) return null;
+      
+      const { data } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", session.user.id)
+        .single();
+      
+      return data;
+    },
+    enabled: !!session?.user?.id,
+  });
+
+  const handleNavigation = (path: string) => {
+    navigate(path);
+    setIsOpen(false);
   };
 
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    navigate("/");
+    setIsOpen(false);
+  };
+
+  const initials = profile?.first_name?.[0] || "U";
+
   return (
-    <Sheet>
+    <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="fixed top-4 right-4 md:hidden z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
+        <Button
+          variant="ghost"
+          size="icon"
+          className="fixed top-4 left-4 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
         >
-          <Menu className="h-6 w-6" />
+          <Menu className="h-5 w-5" />
+          <span className="sr-only">Menu</span>
         </Button>
       </SheetTrigger>
-      <SheetContent>
-        <SheetHeader>
+      <SheetContent side="left" className="w-[280px] sm:w-[350px]">
+        <SheetHeader className="mb-6">
           <SheetTitle>Menu</SheetTitle>
+          <SheetDescription>
+            Navigate to different sections of the app
+          </SheetDescription>
         </SheetHeader>
-        <div className="flex flex-col gap-4 mt-4">
-          <Link to="/profile">
-            <Button variant="ghost" className="w-full justify-start">
-              <User className="mr-2 h-4 w-4" />
-              Profile
-            </Button>
-          </Link>
-          <Link to="/bookings">
-            <Button variant="ghost" className="w-full justify-start">
-              <Bookmark className="mr-2 h-4 w-4" />
-              Bookings
-            </Button>
-          </Link>
-          <Link to="/find-help">
-            <Button variant="ghost" className="w-full justify-start">
-              <Search className="mr-2 h-4 w-4" />
-              Find Help
-            </Button>
-          </Link>
-          <Link to="/become-professional">
-            <Button variant="ghost" className="w-full justify-start">
-              <User className="mr-2 h-4 w-4" />
-              Become a Professional
-            </Button>
-          </Link>
-          <Link to="/terms">
-            <Button variant="ghost" className="w-full justify-start">
-              <FileText className="mr-2 h-4 w-4" />
-              Terms and Conditions
-            </Button>
-          </Link>
+
+        {session ? (
+          <div className="mb-6 flex items-center gap-3 p-2 rounded-lg bg-muted/50">
+            <Avatar className="h-12 w-12 border-2 border-background cursor-pointer" 
+                   onClick={() => handleNavigation("/profile")}>
+              <AvatarImage src={profile?.avatar_url || undefined} />
+              <AvatarFallback>{initials}</AvatarFallback>
+            </Avatar>
+            <div className="flex-1">
+              <p className="font-medium">{profile?.first_name || "User"}</p>
+              <p className="text-sm text-muted-foreground">View profile</p>
+            </div>
+          </div>
+        ) : null}
+
+        <div className="space-y-2">
           <Button
             variant="ghost"
-            className="w-full justify-start text-red-500 hover:text-red-600 hover:bg-red-50"
-            onClick={handleSignOut}
+            className="w-full justify-start"
+            onClick={() => handleNavigation("/")}
           >
-            Sign Out
+            Home
           </Button>
+          
+          {session ? (
+            <>
+              <Button
+                variant="ghost"
+                className="w-full justify-start"
+                onClick={() => handleNavigation("/profile")}
+              >
+                Profile
+              </Button>
+              <Button
+                variant="ghost"
+                className="w-full justify-start"
+                onClick={() => handleNavigation("/bookings")}
+              >
+                My Bookings
+              </Button>
+              <Button
+                variant="ghost"
+                className="w-full justify-start"
+                onClick={() => handleNavigation("/settings")}
+              >
+                Settings
+              </Button>
+              <Button
+                variant="ghost"
+                className="w-full justify-start text-red-500"
+                onClick={handleSignOut}
+              >
+                Sign Out
+              </Button>
+            </>
+          ) : (
+            <Button
+              variant="ghost"
+              className="w-full justify-start"
+              onClick={() => handleNavigation("/auth")}
+            >
+              Sign In
+            </Button>
+          )}
         </div>
       </SheetContent>
     </Sheet>
   );
-};
+}
